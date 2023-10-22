@@ -11,8 +11,10 @@ import com.example.postgresqlinsertion.logic.entity.CurrencyEntity
 import com.example.postgresqlinsertion.logic.entity.PaymentDocumentEntity
 import com.example.postgresqlinsertion.logic.repository.AccountRepository
 import com.example.postgresqlinsertion.logic.repository.CurrencyRepository
+import com.example.postgresqlinsertion.logic.repository.PaymentDocumentCrudRepository
 import com.example.postgresqlinsertion.logic.repository.PaymentDocumentCustomRepository
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -33,6 +35,8 @@ class PaymentDocumentService(
     private val pdBatchByEntitySaverFactory: BatchInsertionByEntityFactory<PaymentDocumentEntity>,
     private val pdBatchByPropertySaverFactory: BatchInsertionByPropertyFactory<PaymentDocumentEntity>,
     private val pdCustomRepository: PaymentDocumentCustomRepository,
+    private val jdbcTemplate: JdbcTemplate,
+    private val pdCrudRepository: PaymentDocumentCrudRepository,
 ) {
 
     @PersistenceContext
@@ -412,6 +416,51 @@ class PaymentDocumentService(
     }
 
     @Transactional
+    fun saveByCrudRepositorySpring(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+
+        log.info("start save by crud repository Spring $count")
+
+        for (i in 0 until count) {
+            pdCrudRepository.save(getRandomEntity(null, currencies.random(), accounts.random()))
+        }
+
+        log.info("end save by crud repository Spring $count")
+
+    }
+
+    @Transactional
+    fun saveByJdbcTemplateSpring(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+
+        log.info("start save by jdbcTemplate $count")
+
+        val batch = mutableListOf<Array<Any?>>()
+        val data = mutableMapOf<KMutableProperty1<PaymentDocumentEntity, *>, Any?>()
+
+        for (i in 0 until count) {
+
+            fillRandomDataByKProperty(null, currencies.random(), accounts.random(), data)
+            batch.add(data.values.toTypedArray())
+            if (i != 0 && i % batchSize == 0) {
+                log.info("save batch $batchSize by jdbcTemplate")
+                jdbcTemplate.batchUpdate("INSERT INTO payment_document VALUES (${data.keys.joinToString { "?" }})", batch)
+                batch.clear()
+            }
+
+        }
+
+        if (batch.size != 0) {
+            jdbcTemplate.batchUpdate("INSERT INTO payment_document VALUES (${data.keys.joinToString { "?" }})", batch)
+        }
+
+        log.info("end save by jdbcTemplate $count")
+
+    }
+
+    @Transactional
     fun updateBySpring(count: Int) {
         val listId = sqlHelper.getIdListForUpdate(count, PaymentDocumentEntity::class)
         val currencies = currencyRepo.findAll()
@@ -453,12 +502,12 @@ class PaymentDocumentService(
         data: MutableMap<KMutableProperty1<PaymentDocumentEntity, *>, Any?>
     ) {
         id?.let { data[PaymentDocumentEntity::id] = it }
+        data[PaymentDocumentEntity::account] = account.id
+        data[PaymentDocumentEntity::amount] = BigDecimal.valueOf(Random.nextDouble())
+        data[PaymentDocumentEntity::expense] = Random.nextBoolean()
+        data[PaymentDocumentEntity::cur] = cur.code
         data[PaymentDocumentEntity::orderDate] = LocalDate.now()
         data[PaymentDocumentEntity::orderNumber] = getRandomString(10)
-        data[PaymentDocumentEntity::amount] = BigDecimal.valueOf(Random.nextDouble())
-        data[PaymentDocumentEntity::cur] = cur.code
-        data[PaymentDocumentEntity::expense] = Random.nextBoolean()
-        data[PaymentDocumentEntity::account] = account.id
         data[PaymentDocumentEntity::paymentPurpose] = getRandomString(100)
         data[PaymentDocumentEntity::prop10] = getRandomString(10)
         data[PaymentDocumentEntity::prop15] = getRandomString(15)

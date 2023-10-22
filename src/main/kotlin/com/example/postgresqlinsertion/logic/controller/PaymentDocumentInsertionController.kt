@@ -255,6 +255,30 @@ class PaymentDocumentInsertionController(
         )
     }
 
+    @PostMapping("/spring-by-crud-repository/{count}")
+    fun insertViaSpringSaveByCrudRepository(@PathVariable count: Int): ResponseDto {
+        val time = measureTimeMillis {
+            service.saveByCrudRepositorySpring(count)
+        }
+        return ResponseDto(
+            name = "Save by crud repository Spring",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
+    @PostMapping("/spring-jdbc-template/{count}")
+    fun insertViaJdbcTemplate(@PathVariable count: Int): ResponseDto {
+        val time = measureTimeMillis {
+            service.saveByJdbcTemplateSpring(count)
+        }
+        return ResponseDto(
+            name = "Save by jdbc template",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
     @PostMapping("/spring-update/{count}")
     fun updateViaSpring(@PathVariable count: Int): ResponseDto {
         val time = measureTimeMillis {

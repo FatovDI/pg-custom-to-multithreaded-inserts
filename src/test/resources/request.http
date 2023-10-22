@@ -46,8 +46,8 @@ POST http://localhost:8080/test-insertion/update-by-property/200
 Content-Type: application/json
 
 ###
-POST http://localhost:8080/test-insertion/insert-with-drop-index/200
-Content-Type: application/json
+#POST http://localhost:8080/test-insertion/insert-with-drop-index/200
+#Content-Type: application/json
 
 ###
 POST http://localhost:8080/test-insertion/spring/6
@@ -71,6 +71,14 @@ Content-Type: application/json
 
 ###
 POST http://localhost:8080/test-insertion/spring-with-copy-concurrent/5
+Content-Type: application/json
+
+###
+POST http://localhost:8080/test-insertion/spring-jdbc-template/5
+Content-Type: application/json
+
+###
+POST http://localhost:8080/test-insertion/spring-by-crud-repository/5
 Content-Type: application/json
 
 ###
