@@ -6,5 +6,6 @@ enum class SaverType {
     COPY_VIA_FILE,
     COPY_BINARY_VIA_FILE,
     INSERT,
+    INSERT_PREPARED_STATEMENT,
     UPDATE
 }

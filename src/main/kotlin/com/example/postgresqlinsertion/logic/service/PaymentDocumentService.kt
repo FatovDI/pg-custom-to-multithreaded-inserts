@@ -4,6 +4,8 @@ import com.example.postgresqlinsertion.batchinsertion.api.SqlHelper
 import com.example.postgresqlinsertion.batchinsertion.api.factory.BatchInsertionByEntityFactory
 import com.example.postgresqlinsertion.batchinsertion.api.factory.BatchInsertionByPropertyFactory
 import com.example.postgresqlinsertion.batchinsertion.api.factory.SaverType
+import com.example.postgresqlinsertion.batchinsertion.getColumnsString
+import com.example.postgresqlinsertion.batchinsertion.getColumnsStringByClass
 import com.example.postgresqlinsertion.batchinsertion.utils.getRandomString
 import com.example.postgresqlinsertion.batchinsertion.utils.logger
 import com.example.postgresqlinsertion.logic.entity.AccountEntity
@@ -15,6 +17,8 @@ import com.example.postgresqlinsertion.logic.repository.PaymentDocumentCrudRepos
 import com.example.postgresqlinsertion.logic.repository.PaymentDocumentCustomRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -36,6 +40,7 @@ class PaymentDocumentService(
     private val pdBatchByPropertySaverFactory: BatchInsertionByPropertyFactory<PaymentDocumentEntity>,
     private val pdCustomRepository: PaymentDocumentCustomRepository,
     private val jdbcTemplate: JdbcTemplate,
+    private val namedJdbcTemplate: NamedParameterJdbcTemplate,
     private val pdCrudRepository: PaymentDocumentCrudRepository,
 ) {
 
@@ -195,6 +200,20 @@ class PaymentDocumentService(
         val accounts = accountRepo.findAll()
 
         pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT).use { saver ->
+            for (i in 0 until count) {
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
+            }
+            saver.commit()
+        }
+
+    }
+
+
+    fun saveByInsertWithPreparedStatement(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+
+        pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
             for (i in 0 until count) {
                 saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
             }
@@ -439,6 +458,9 @@ class PaymentDocumentService(
 
         val batch = mutableListOf<Array<Any?>>()
         val data = mutableMapOf<KMutableProperty1<PaymentDocumentEntity, *>, Any?>()
+        val sql = mutableMapOf<KMutableProperty1<PaymentDocumentEntity, *>, Any?>()
+            .apply { fillRandomDataByKProperty(null, currencies.random(), accounts.random(), this) }
+            .let { "INSERT INTO payment_document (${getColumnsString(it.keys)}) VALUES (${it.keys.joinToString { "?" }})" }
 
         for (i in 0 until count) {
 
@@ -446,17 +468,54 @@ class PaymentDocumentService(
             batch.add(data.values.toTypedArray())
             if (i != 0 && i % batchSize == 0) {
                 log.info("save batch $batchSize by jdbcTemplate")
-                jdbcTemplate.batchUpdate("INSERT INTO payment_document VALUES (${data.keys.joinToString { "?" }})", batch)
+                jdbcTemplate.batchUpdate(sql, batch)
                 batch.clear()
             }
 
         }
 
         if (batch.size != 0) {
-            jdbcTemplate.batchUpdate("INSERT INTO payment_document VALUES (${data.keys.joinToString { "?" }})", batch)
+            jdbcTemplate.batchUpdate(sql, batch)
         }
 
         log.info("end save by jdbcTemplate $count")
+
+    }
+
+    @Transactional
+    fun saveByNamedJdbcTemplateSpring(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+
+        log.info("start save by namedJdbcTemplate $count")
+
+        val columns = PaymentDocumentEntity::class.java.declaredFields.joinToString(",") { ":${it.name}" }
+
+        // todo разобраться почему не работает с PaymentDocumentEntity.
+        val batch = mutableListOf<PaymentDocumentEntity>()
+
+        for (i in 0 until count) {
+
+            batch.add(getRandomEntity(null, currencies.random(), accounts.random()))
+            if (i != 0 && i % batchSize == 0) {
+                log.info("save batch $batchSize by namedJdbcTemplate")
+                namedJdbcTemplate.batchUpdate(
+                    "INSERT INTO payment_document (${getColumnsStringByClass(PaymentDocumentEntity::class)}) VALUES ($columns)",
+                    SqlParameterSourceUtils.createBatch(batch)
+                )
+                batch.clear()
+            }
+
+        }
+
+        if (batch.size != 0) {
+            namedJdbcTemplate.batchUpdate(
+                "INSERT INTO payment_document VALUES ($columns)",
+                SqlParameterSourceUtils.createBatch(batch)
+            )
+        }
+
+        log.info("end save by namedJdbcTemplate $count")
 
     }
 

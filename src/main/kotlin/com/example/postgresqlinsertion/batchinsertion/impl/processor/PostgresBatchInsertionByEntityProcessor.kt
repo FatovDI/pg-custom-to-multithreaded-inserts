@@ -1,7 +1,7 @@
 package com.example.postgresqlinsertion.batchinsertion.impl.processor
 
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByEntityProcessor
-import com.example.postgresqlinsertion.batchinsertion.getDataFromEntity
+import com.example.postgresqlinsertion.batchinsertion.getStringDataFromEntity
 import com.example.postgresqlinsertion.batchinsertion.getDataFromEntityByField
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import org.springframework.stereotype.Component
@@ -19,7 +19,7 @@ class PostgresBatchInsertionByEntityProcessor(
     private val nullValue = "NULL"
 
     override fun addDataForCreate(data: BaseEntity, writer: BufferedWriter) {
-        val values = getDataFromEntity(data)
+        val values = getStringDataFromEntity(data)
         writer.write(getStringForWrite(values, delimiter, nullValue))
         writer.newLine()
     }
@@ -39,7 +39,7 @@ class PostgresBatchInsertionByEntityProcessor(
         getStringForInsert(data).let { "($it) where id = '${data.id}'" }
 
     override fun getStringForInsert(data: BaseEntity) =
-        getStringForInsert(getDataFromEntity(data), nullValue)
+        getStringForInsert(getStringDataFromEntity(data), nullValue)
 
     override fun saveToDataBaseByCopyMethod(clazz: KClass<out BaseEntity>, from: Reader, conn: Connection) {
         saveToDataBaseByCopyMethod(clazz, from, delimiter, nullValue, conn)

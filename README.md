@@ -1,4 +1,4 @@
-# Acceleration Insertion for PostgreSQL - Joker2023 🚀
+# Acceleration Insertion for PostgreSQL - Jpoint2024 🚀
 
 ## **Description**
 

@@ -1,7 +1,7 @@
 # add environment variables to start via Idea -> POSTGRES_DATABASE=postgres;POSTGRES_HOST=localhost;POSTGRES_PASSWORD=postgres;POSTGRES_PORT=5435;POSTGRES_USER_NAME=postgres
 
 batch_insertion:
-  batch_size: 100000
+  batch_size: 5000
   pool_size: 8
   concurrent_saves: 4
 

@@ -12,10 +12,13 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.jvmName
 
+fun getStringDataFromEntity(entity: BaseEntity) =
+    getDataFromEntity(entity).map { it?.toString() }
+
 fun getDataFromEntity(entity: BaseEntity) =
     entity.javaClass.declaredFields.map { field ->
         field.trySetAccessible()
-        getDataFromEntityByField(entity, field)?.toString()
+        getDataFromEntityByField(entity, field)
     }
 
 fun getDataFromEntityByField(entity: BaseEntity, field: Field) =
@@ -46,6 +49,9 @@ fun getTableName(clazz: KClass<*>): String {
 
 fun getColumnsStringByClass(clazz: KClass<out BaseEntity>) =
     clazz.java.declaredFields.joinToString(",") { getColumnName(it) }
+
+fun getColumnsByClass(clazz: KClass<out BaseEntity>) =
+    clazz.java.declaredFields.map { getColumnName(it) }
 
 fun getColumnsString(columns: Set<KProperty1<*, *>>) =
     columns.joinToString(",") { getColumnName(it.javaField) }

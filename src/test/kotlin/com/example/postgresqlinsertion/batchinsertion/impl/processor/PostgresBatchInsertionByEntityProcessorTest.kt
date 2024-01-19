@@ -1,6 +1,7 @@
 package com.example.postgresqlinsertion.batchinsertion.impl.processor
 
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByEntityProcessor
+import com.example.postgresqlinsertion.batchinsertion.getDataFromEntity
 import com.example.postgresqlinsertion.logic.entity.AccountEntity
 import com.example.postgresqlinsertion.logic.entity.CurrencyEntity
 import com.example.postgresqlinsertion.logic.entity.PaymentDocumentEntity
@@ -116,6 +117,85 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
             assertThat(savedDoc[index][2]).isEqualTo(pair.second)
             assertThat(savedDoc[index][3].toString()).isEqualTo(cur)
         }
+    }
+
+    @Test
+    fun `save several entity data via insert with prepared statement method`() {
+        val cur = em.createNativeQuery("select code from currency limit 1").singleResult.toString()
+        val dataForInsert = mutableListOf<List<Any?>>()
+
+        getTestData().forEach {
+            val data = PaymentDocumentEntity(
+                prop15 = "NEW_PS",
+                cur = CurrencyEntity(code = cur),
+                paymentPurpose = it.first,
+                prop10 = it.second,
+            )
+            dataForInsert.add(getDataFromEntity(data))
+        }
+        processor.insertDataToDataBasePreparedStatement(clazz = PaymentDocumentEntity::class, data = dataForInsert, conn = conn)
+
+        val savedDoc =
+            em.createNativeQuery("select payment_purpose, prop_15, prop_10, cur  from payment_document where prop_15 = 'NEW_PS' and cur = '$cur'").resultList as List<Array<Any>>
+        assertThat(savedDoc.size).isEqualTo(4)
+        getTestData().forEachIndexed { index, pair ->
+            assertThat(savedDoc[index][0]).isEqualTo(pair.first)
+            assertThat(savedDoc[index][1]).isEqualTo("NEW_PS")
+            assertThat(savedDoc[index][2]).isEqualTo(pair.second)
+            assertThat(savedDoc[index][3].toString()).isEqualTo(cur)
+        }
+    }
+
+    @Test
+    fun `save all entity data via insert with prepared statement method`() {
+        val dataForInsert = mutableListOf<List<Any?>>()
+        val prop10 = "7171_PS"
+        val accountId = em.createNativeQuery("select id from account limit 1").singleResult.toString()
+        dataForInsert.add(
+            getDataFromEntity(
+                PaymentDocumentEntity(
+                    account = AccountEntity().apply { id = accountId.toLong() },
+                    expense = false,
+                    amount = BigDecimal("10.11"),
+                    cur = CurrencyEntity(code = "RUB"),
+                    orderDate = LocalDate.parse("2023-01-01"),
+                    orderNumber = "123",
+                    prop20 = "1345",
+                    prop15 = "END",
+                    paymentPurpose = null,
+                    prop10 = prop10,
+                )
+            )
+        )
+
+        processor.insertDataToDataBasePreparedStatement(clazz = PaymentDocumentEntity::class, data = dataForInsert, conn = conn)
+
+        val savedDoc = em.createNativeQuery(
+            """
+                select
+                    account_id,
+                    expense,
+                    cur,
+                    amount,
+                    order_date,
+                    order_number,
+                    prop_20,
+                    prop_15,
+                    payment_purpose,
+                    prop_10
+                from payment_document where prop_10 = '$prop10'
+            """.trimIndent()
+        ).resultList as List<Array<Any>>
+        assertThat(savedDoc.first()[0].toString()).isEqualTo(accountId)
+        assertThat(savedDoc.first()[1]).isEqualTo(false)
+        assertThat(savedDoc.first()[2]).isEqualTo("RUB")
+        assertThat(savedDoc.first()[3]).isEqualTo(BigDecimal("10.11"))
+        assertThat(savedDoc.first()[4]).isEqualTo(Date.valueOf("2023-01-01"))
+        assertThat(savedDoc.first()[5]).isEqualTo("123")
+        assertThat(savedDoc.first()[6]).isEqualTo("1345")
+        assertThat(savedDoc.first()[7]).isEqualTo("END")
+        assertThat(savedDoc.first()[8]).isNull()
+        assertThat(savedDoc.first()[9]).isEqualTo(prop10)
     }
 
     @Test

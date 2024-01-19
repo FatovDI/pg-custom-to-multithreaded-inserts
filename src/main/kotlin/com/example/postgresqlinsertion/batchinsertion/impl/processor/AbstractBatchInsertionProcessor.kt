@@ -87,6 +87,16 @@ abstract class AbstractBatchInsertionProcessor {
     }
 
     /**
+     * save list data with insert method and prepared statement
+     * @param clazz - entity class
+     * @param data - list of string by columns
+     * @param conn - DB connection
+     */
+    fun insertDataToDataBasePreparedStatement(clazz: KClass<out BaseEntity>, data: List<List<Any?>>, conn: Connection) {
+        insertDataToDataBasePreparedStatement(getTableName(clazz), getColumnsByClass(clazz), data, conn)
+    }
+
+    /**
      * save list data with update method
      * @param clazz - entity class
      * @param data - list of string
@@ -117,7 +127,7 @@ abstract class AbstractBatchInsertionProcessor {
 
     /**
      * get string for insert by entity
-     * @param data - entity
+     * @param data - list of data from entity
      * @param nullValue - string to define null value
      * @return String - string for insert
      */
@@ -225,6 +235,33 @@ abstract class AbstractBatchInsertionProcessor {
                         .joinToString("\n")
                 }"
             )
+        }
+    }
+
+    /**
+     * save list data with insert method and prepared statement
+     * @param tableName - table name in DB
+     * @param columns - list of columns
+     * @param data - list of string
+     * @param conn - DB connection
+     */
+    fun insertDataToDataBasePreparedStatement(tableName: String, columns: List<String>, data: List<List<Any?>>, conn: Connection) {
+
+        val params = columns.joinToString(", ") { "?" }
+
+        conn.prepareStatement(
+            "INSERT INTO $tableName (${columns.joinToString(",")}) VALUES ${
+                List(data.size) { index -> "(${params})${if (index == data.lastIndex) ";" else ","}" }.joinToString("\n")
+            }"
+        ).use { stmt ->
+            var idx = 0
+            data.forEach { str ->
+                str.forEach { col ->
+                    idx++
+                    stmt.setObject(idx, col)
+                }
+            }
+            stmt.executeLargeUpdate()
         }
     }
 

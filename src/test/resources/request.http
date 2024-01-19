@@ -34,6 +34,10 @@ POST http://localhost:8080/test-insertion/insert/200
 Content-Type: application/json
 
 ###
+POST http://localhost:8080/test-insertion/insert-prepared-statement/200
+Content-Type: application/json
+
+###
 POST http://localhost:8080/test-insertion/update/40
 Content-Type: application/json
 
@@ -74,7 +78,11 @@ POST http://localhost:8080/test-insertion/spring-with-copy-concurrent/5
 Content-Type: application/json
 
 ###
-POST http://localhost:8080/test-insertion/spring-jdbc-template/5
+POST http://localhost:8080/test-insertion/spring-jdbc-template/200
+Content-Type: application/json
+
+###
+POST http://localhost:8080/test-insertion/spring-named-jdbc-template/200
 Content-Type: application/json
 
 ###

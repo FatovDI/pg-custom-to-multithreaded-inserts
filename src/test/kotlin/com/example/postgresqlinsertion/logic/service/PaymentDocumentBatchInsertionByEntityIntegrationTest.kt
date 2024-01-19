@@ -87,7 +87,6 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
         assertThat(savedPd[1].paymentPurpose).isEqualTo(paymentPurpose)
     }
 
-
     @Test
     fun `save entity via insert method`() {
         val orderNumber = "333"
@@ -145,6 +144,62 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
         assertThat(savedPd[1].paymentPurpose).isEqualTo(paymentPurpose)
     }
 
+    @Test
+    fun `save entity via insert method with prepared statement`() {
+        val orderNumber = "333_PS"
+        val orderDate = LocalDate.now()
+        val paymentPurpose = "save entity via insert method with prepared statement"
+
+        batchInsertionFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
+
+            saver.addDataForSave(
+                PaymentDocumentEntity(
+                    paymentPurpose = paymentPurpose,
+                    orderNumber = orderNumber,
+                    orderDate = orderDate,
+                    prop15 = "END"
+                )
+            )
+            saver.commit()
+        }
+
+        val savedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
+        assertThat(savedPd.size).isGreaterThan(0)
+        assertThat(savedPd.first().paymentPurpose).isEqualTo(paymentPurpose)
+    }
+
+    @Test
+    fun `save several entity via insert method with prepared statement`() {
+        val orderNumber = "444_PS"
+        val orderDate = LocalDate.now()
+        val paymentPurpose = "save several entity via insert method with prepared statement"
+
+        batchInsertionFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
+
+            saver.addDataForSave(
+                PaymentDocumentEntity(
+                    paymentPurpose = paymentPurpose,
+                    orderNumber = orderNumber,
+                    orderDate = orderDate,
+                    prop15 = "END"
+                )
+            )
+            saver.addDataForSave(
+                PaymentDocumentEntity(
+                    paymentPurpose = paymentPurpose,
+                    orderNumber = orderNumber,
+                    orderDate = orderDate,
+                    prop15 = "END"
+                )
+            )
+            saver.commit()
+        }
+
+        val savedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
+        assertThat(savedPd.size).isEqualTo(2)
+        assertThat(savedPd[0].paymentPurpose).isEqualTo(paymentPurpose)
+        assertThat(savedPd[1].paymentPurpose).isEqualTo(paymentPurpose)
+    }
 
     @Test
     fun `update entity via insert method`() {

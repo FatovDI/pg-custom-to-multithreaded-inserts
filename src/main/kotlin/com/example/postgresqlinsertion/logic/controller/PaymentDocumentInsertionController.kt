@@ -123,6 +123,18 @@ class PaymentDocumentInsertionController(
         )
     }
 
+    @PostMapping("/insert-prepared-statement/{count}")
+    fun insertViaInsertWithPreparedStatement(@PathVariable count: Int): ResponseDto {
+        val time = measureTimeMillis {
+            service.saveByInsertWithPreparedStatement(count)
+        }
+        return ResponseDto(
+            name = "Insert method with prepared statement",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
     @PostMapping("/update/{count}")
     fun update(@PathVariable count: Int): ResponseDto {
         val time = measureTimeMillis {
@@ -274,6 +286,18 @@ class PaymentDocumentInsertionController(
         }
         return ResponseDto(
             name = "Save by jdbc template",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
+    @PostMapping("/spring-named-jdbc-template/{count}")
+    fun insertViaNamedJdbcTemplate(@PathVariable count: Int): ResponseDto {
+        val time = measureTimeMillis {
+            service.saveByNamedJdbcTemplateSpring(count)
+        }
+        return ResponseDto(
+            name = "Save by named jdbc template",
             count = count,
             time = getTimeString(time)
         )
