@@ -96,8 +96,9 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
     fun `save several entity data via insert method`() {
         val cur = em.createNativeQuery("select code from currency limit 1").singleResult.toString()
         val dataForInsert = mutableListOf<String>()
+        val testData = getTestData()
 
-        getTestData().forEach {
+        testData.forEach {
             val data = PaymentDocumentEntity(
                 prop15 = "NEW",
                 cur = CurrencyEntity(code = cur),
@@ -110,8 +111,8 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
 
         val savedDoc =
             em.createNativeQuery("select payment_purpose, prop_15, prop_10, cur  from payment_document where prop_15 = 'NEW' and cur = '$cur'").resultList as List<Array<Any>>
-        assertThat(savedDoc.size).isEqualTo(4)
-        getTestData().forEachIndexed { index, pair ->
+        assertThat(savedDoc.size).isEqualTo(testData.size)
+        testData.forEachIndexed { index, pair ->
             assertThat(savedDoc[index][0]).isEqualTo(pair.first)
             assertThat(savedDoc[index][1]).isEqualTo("NEW")
             assertThat(savedDoc[index][2]).isEqualTo(pair.second)
@@ -123,8 +124,9 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
     fun `save several entity data via insert with prepared statement method`() {
         val cur = em.createNativeQuery("select code from currency limit 1").singleResult.toString()
         val dataForInsert = mutableListOf<List<Any?>>()
+        val testData = getTestData()
 
-        getTestData().forEach {
+        testData.forEach {
             val data = PaymentDocumentEntity(
                 prop15 = "NEW_PS",
                 cur = CurrencyEntity(code = cur),
@@ -137,8 +139,8 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
 
         val savedDoc =
             em.createNativeQuery("select payment_purpose, prop_15, prop_10, cur  from payment_document where prop_15 = 'NEW_PS' and cur = '$cur'").resultList as List<Array<Any>>
-        assertThat(savedDoc.size).isEqualTo(4)
-        getTestData().forEachIndexed { index, pair ->
+        assertThat(savedDoc.size).isEqualTo(testData.size)
+        testData.forEachIndexed { index, pair ->
             assertThat(savedDoc[index][0]).isEqualTo(pair.first)
             assertThat(savedDoc[index][1]).isEqualTo("NEW_PS")
             assertThat(savedDoc[index][2]).isEqualTo(pair.second)
@@ -254,8 +256,9 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
         val file = File(this::class.java.getResource("").file, "/PD_Test.csv")
         val writer = file.bufferedWriter()
         val prop20 = "77778778"
+        val testData = getTestData()
 
-        getTestData().forEach {
+        testData.forEach {
             val data = PaymentDocumentEntity(
                 prop15 = "END",
                 prop20 = prop20,
@@ -269,8 +272,8 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
 
         val savedDoc =
             em.createNativeQuery("select payment_purpose, prop_15, prop_10, prop_20  from payment_document where prop_20 = '$prop20'").resultList as List<Array<Any>>
-        assertThat(savedDoc.size).isEqualTo(4)
-        getTestData().forEachIndexed { index, pair ->
+        assertThat(savedDoc.size).isEqualTo(testData.size)
+        testData.forEachIndexed { index, pair ->
             assertThat(savedDoc[index][0]).isEqualTo(pair.first)
             assertThat(savedDoc[index][1]).isEqualTo("END")
             assertThat(savedDoc[index][2]).isEqualTo(pair.second)
@@ -359,10 +362,11 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
         val file = File(this::class.java.getResource("").file, "/PD_Test")
         val writer = DataOutputStream(file.outputStream())
         val prop20 = "77778778_b"
+        val testData = getTestData()
 
         processor.startSaveBinaryDataForCopyMethod(writer)
 
-        getTestData().forEach {
+        testData.forEach {
             val data = PaymentDocumentEntity(
                 prop15 = "END",
                 prop20 = prop20,
@@ -376,8 +380,8 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
 
         val savedDoc =
             em.createNativeQuery("select payment_purpose, prop_15, prop_10, prop_20  from payment_document where prop_20 = '$prop20'").resultList as List<Array<Any>>
-        assertThat(savedDoc.size).isEqualTo(4)
-        getTestData().forEachIndexed { index, pair ->
+        assertThat(savedDoc.size).isEqualTo(testData.size)
+        testData.forEachIndexed { index, pair ->
             assertThat(savedDoc[index][0]).isEqualTo(pair.first)
             assertThat(savedDoc[index][1]).isEqualTo("END")
             assertThat(savedDoc[index][2]).isEqualTo(pair.second)
@@ -419,7 +423,8 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
                 Pair("бла бла", "222"),
                 Pair("бла бла | бла блабла", "333"),
                 Pair("б`л~а !б@л#а№;ж\$s%u ^s p &l? z* (d)- _s+= /W\\|{we}[ct]a,r<cs.>w's", "444"),
-                Pair("бла\b бла \n бла \r бла \tбла бла", "555")
+                Pair("бла\b бла \n бла \r бла \tбла бла", "555"),
+                Pair("select id from account limit 1", "666")
             )
         }
 
