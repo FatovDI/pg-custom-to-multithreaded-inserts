@@ -274,6 +274,78 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
     }
 
     @Test
+    fun `update entity via insert method prepared statement`() {
+        val orderNumber = "555_ps"
+        val orderDate = LocalDate.now()
+        val paymentPurposeIns = "save entity via insert method prepared statement"
+        val paymentPurposeUpd = "update entity via insert method prepared statement"
+        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+            saver.addDataForSave(
+                PaymentDocumentEntity(
+                    paymentPurpose = paymentPurposeIns,
+                    orderNumber = orderNumber,
+                    orderDate = orderDate,
+                    prop15 = "END"
+                )
+            )
+            saver.commit()
+        }
+        val savedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
+        assertThat(savedPd.size).isEqualTo(1)
+
+        batchInsertionFactory.getSaver(SaverType.UPDATE_PREPARED_STATEMENT).use { saver ->
+            saver.addDataForSave(savedPd.first().apply { paymentPurpose = paymentPurposeUpd })
+            saver.commit()
+        }
+
+        val updatedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
+        assertThat(updatedPd.size).isGreaterThan(0)
+        assertThat(updatedPd.first().paymentPurpose).isEqualTo(paymentPurposeUpd)
+    }
+
+    @Test
+    fun `update several entity via insert method prepared statement`() {
+        val orderNumber = "666_ps"
+        val orderDate = LocalDate.now()
+        val paymentPurposeIns = "save several entity via insert method prepared statement"
+        val paymentPurposeUpd = "update several entity via insert method prepared statement"
+        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+
+            saver.addDataForSave(
+                PaymentDocumentEntity(
+                    paymentPurpose = paymentPurposeIns,
+                    orderNumber = orderNumber,
+                    orderDate = orderDate,
+                    prop15 = "END"
+                )
+            )
+            saver.addDataForSave(
+                PaymentDocumentEntity(
+                    paymentPurpose = paymentPurposeIns,
+                    orderNumber = orderNumber,
+                    orderDate = orderDate,
+                    prop15 = "END"
+                )
+            )
+            saver.commit()
+        }
+        val savedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
+        assertThat(savedPd.size).isEqualTo(2)
+
+        batchInsertionFactory.getSaver(SaverType.UPDATE_PREPARED_STATEMENT).use { saver ->
+            saver.addDataForSave(savedPd[0].apply { paymentPurpose = paymentPurposeUpd })
+            saver.addDataForSave(savedPd[1].apply { paymentPurpose = paymentPurposeUpd })
+            saver.saveData()
+            saver.commit()
+        }
+
+        val updatedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
+        assertThat(updatedPd.size).isEqualTo(2)
+        assertThat(updatedPd[0].paymentPurpose).isEqualTo(paymentPurposeUpd)
+        assertThat(updatedPd[1].paymentPurpose).isEqualTo(paymentPurposeUpd)
+    }
+
+    @Test
     fun `save entity via copy method by binary file`() {
         val orderNumber = "777"
         val orderDate = LocalDate.now()

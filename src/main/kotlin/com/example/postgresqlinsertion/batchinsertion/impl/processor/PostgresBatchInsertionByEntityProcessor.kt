@@ -1,8 +1,8 @@
 package com.example.postgresqlinsertion.batchinsertion.impl.processor
 
+import com.example.postgresqlinsertion.batchinsertion.*
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByEntityProcessor
-import com.example.postgresqlinsertion.batchinsertion.getStringDataFromEntity
-import com.example.postgresqlinsertion.batchinsertion.getDataFromEntityByField
+import com.example.postgresqlinsertion.batchinsertion.api.processor.DataForUpdate
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import org.springframework.stereotype.Component
 import java.io.BufferedWriter
@@ -43,6 +43,18 @@ class PostgresBatchInsertionByEntityProcessor(
 
     override fun saveToDataBaseByCopyMethod(clazz: KClass<out BaseEntity>, from: Reader, conn: Connection) {
         saveToDataBaseByCopyMethod(clazz, from, delimiter, nullValue, conn)
+    }
+
+    override fun updateDataToDataBasePreparedStatement(
+        clazz: KClass<out BaseEntity>,
+        data: List<List<Any?>>,
+        conditionParams: List<String>,
+        conn: Connection
+    ) {
+        updateDataToDataBasePreparedStatement(
+            DataForUpdate(getTableName(clazz), getColumnsByClass(clazz), conditionParams, data),
+            conn
+        )
     }
 
 }

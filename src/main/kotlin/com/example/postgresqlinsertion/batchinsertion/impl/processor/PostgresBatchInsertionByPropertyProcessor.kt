@@ -1,6 +1,8 @@
 package com.example.postgresqlinsertion.batchinsertion.impl.processor
 
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByPropertyProcessor
+import com.example.postgresqlinsertion.batchinsertion.api.processor.DataForUpdate
+import com.example.postgresqlinsertion.batchinsertion.getColumnName
 import com.example.postgresqlinsertion.batchinsertion.getColumnsString
 import com.example.postgresqlinsertion.batchinsertion.getTableName
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
@@ -12,6 +14,7 @@ import java.io.Reader
 import java.sql.Connection
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
+import kotlin.reflect.jvm.javaField
 
 @Component
 class PostgresBatchInsertionByPropertyProcessor(
@@ -81,6 +84,19 @@ class PostgresBatchInsertionByPropertyProcessor(
         conn: Connection
     ) {
         updateDataToDataBase(getTableName(clazz), getColumnsString(columns), data, conn)
+    }
+
+    override fun updateDataToDataBasePreparedStatement(
+        clazz: KClass<out BaseEntity>,
+        columns: Set<KProperty1<out BaseEntity, *>>,
+        data: Collection<Collection<Any?>>,
+        conditionParams: Collection<String>,
+        conn: Connection
+    ): Int {
+        return updateDataToDataBasePreparedStatement(
+            DataForUpdate(getTableName(clazz), columns.map { getColumnName(it.javaField) }, conditionParams, data),
+            conn
+        )
     }
 
     override fun getStringForInsert(data: Map<out KProperty1<out BaseEntity, *>, Any?>, nullValue: String) =

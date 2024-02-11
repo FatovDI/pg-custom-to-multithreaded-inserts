@@ -121,4 +121,21 @@ interface BatchInsertionByPropertyProcessor {
         clazz: KClass<out BaseEntity>, columns: Set<KProperty1<out BaseEntity, *>>, data: List<String>, conn: Connection
     )
 
+    /**
+     * save list data with update method by set of property and prepared statement
+     * @param clazz - entity class
+     * @param columns - set of entity property
+     * @param data - list with batched data
+     * @param conditionParams - list with names of parameter
+     * @param conn - DB connection
+     * @return count updated rows
+     */
+    fun updateDataToDataBasePreparedStatement(
+        clazz: KClass<out BaseEntity>,
+        columns: Set<KProperty1<out BaseEntity, *>>,
+        data: Collection<Collection<Any?>>,
+        conditionParams: Collection<String>,
+        conn: Connection
+    ): Int
+
 }

@@ -27,6 +27,7 @@ abstract class BatchInsertionByPropertyFactory<E: BaseEntity>(
             SaverType.INSERT -> InsertByPropertySaver(processor, entityClass, conn)
             SaverType.INSERT_PREPARED_STATEMENT -> TODO()
             SaverType.UPDATE -> UpdateByPropertySaver(processor, entityClass, conn)
+            SaverType.UPDATE_PREPARED_STATEMENT -> UpdateByPropertyPreparedStatementSaver(processor, entityClass, conn)
         }
 
     }

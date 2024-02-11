@@ -38,7 +38,19 @@ POST http://localhost:8080/test-insertion/insert-prepared-statement/200
 Content-Type: application/json
 
 ###
+POST http://localhost:8080/test-insertion/insert-prepared-statement/200?orderNumber=NumberForUpdate
+Content-Type: application/json
+
+###
+POST http://localhost:8080/test-insertion/update-only-one-field-with-common-condition/NumberForUpdate?prop10=UpdProp1
+Content-Type: application/json
+
+###
 POST http://localhost:8080/test-insertion/update/40
+Content-Type: application/json
+
+###
+POST http://localhost:8080/test-insertion/update-prepared-statement/40
 Content-Type: application/json
 
 ###
@@ -47,6 +59,14 @@ Content-Type: application/json
 
 ###
 POST http://localhost:8080/test-insertion/update-by-property/200
+Content-Type: application/json
+
+###
+POST http://localhost:8080/test-insertion/update-by-property-prepared-statement/200
+Content-Type: application/json
+
+###
+POST http://localhost:8080/test-insertion/update-only-one-field-by-property-prepared-statement/1
 Content-Type: application/json
 
 ###

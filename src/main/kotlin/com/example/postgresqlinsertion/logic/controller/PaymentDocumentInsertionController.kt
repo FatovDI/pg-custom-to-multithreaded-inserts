@@ -2,10 +2,7 @@ package com.example.postgresqlinsertion.logic.controller
 
 import com.example.postgresqlinsertion.logic.dto.ResponseDto
 import com.example.postgresqlinsertion.logic.service.PaymentDocumentService
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import kotlin.system.measureTimeMillis
 
 @RestController
@@ -124,9 +121,12 @@ class PaymentDocumentInsertionController(
     }
 
     @PostMapping("/insert-prepared-statement/{count}")
-    fun insertViaInsertWithPreparedStatement(@PathVariable count: Int): ResponseDto {
+    fun insertViaInsertWithPreparedStatement(
+        @PathVariable count: Int,
+        @RequestParam orderNumber: String? = null
+    ): ResponseDto {
         val time = measureTimeMillis {
-            service.saveByInsertWithPreparedStatement(count)
+            service.saveByInsertWithPreparedStatement(count, orderNumber)
         }
         return ResponseDto(
             name = "Insert method with prepared statement",
@@ -142,6 +142,18 @@ class PaymentDocumentInsertionController(
         }
         return ResponseDto(
             name = "Update method",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
+    @PostMapping("/update-prepared-statement/{count}")
+    fun updatePreparedStatement(@PathVariable count: Int): ResponseDto {
+        val time = measureTimeMillis {
+            service.updatePreparedStatement(count)
+        }
+        return ResponseDto(
+            name = "Update method prepared statement",
             count = count,
             time = getTimeString(time)
         )
@@ -171,6 +183,18 @@ class PaymentDocumentInsertionController(
         )
     }
 
+    @PostMapping("/update-by-property-prepared-statement/{count}")
+    fun updateViaInsertAndPropertyPreparedStatement(@PathVariable count: Int): ResponseDto {
+        val time = measureTimeMillis {
+            service.updateByPropertyPreparedStatement(count)
+        }
+        return ResponseDto(
+            name = "Update method by property prepared statement",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
     @PostMapping("/update-only-one-field-by-property/{count}")
     fun updateOnlyOneFieldViaProperty(@PathVariable count: Int): ResponseDto {
         val time = measureTimeMillis {
@@ -178,6 +202,34 @@ class PaymentDocumentInsertionController(
         }
         return ResponseDto(
             name = "Update only one field by property with transaction",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
+    @PostMapping("/update-only-one-field-by-property-prepared-statement/{count}")
+    fun updateOnlyOneFieldViaPropertyPreparedStatement(@PathVariable count: Int): ResponseDto {
+        val time = measureTimeMillis {
+            service.updateOnlyOneFieldByPropertyPreparedStatement(count)
+        }
+        return ResponseDto(
+            name = "Update only one field by property with transaction prepared statement",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
+    @PostMapping("/update-only-one-field-with-common-condition/{orderNumber}")
+    fun updateOnlyOneFieldWithCommonCondition(
+        @PathVariable orderNumber: String,
+        @RequestParam prop10: String
+    ): ResponseDto {
+        var count = 0
+        val time = measureTimeMillis {
+            count = service.updateOnlyOneFieldWithCommonCondition(orderNumber, prop10)
+        }
+        return ResponseDto(
+            name = "Update only one field with common condition",
             count = count,
             time = getTimeString(time)
         )

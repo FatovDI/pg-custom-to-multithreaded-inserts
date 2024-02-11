@@ -131,7 +131,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         assertThat(savedPd[1].paymentPurpose).isEqualTo(paymentPurpose)
     }
 
-
     @Test
     fun `update data via insert method`() {
         val orderNumber = "p555"
@@ -201,6 +200,87 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         )
 
         batchInsertionFactory.getSaver(SaverType.UPDATE).use { saver ->
+            saver.addDataForSave(updateData)
+            saver.addDataForSave(updateData.apply { put(PaymentDocumentEntity::id, savedPd[1].id) })
+            saver.saveData(updateData.keys)
+            saver.commit()
+        }
+
+        val updatedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
+        assertThat(updatedPd.size).isEqualTo(2)
+        assertThat(updatedPd[0].paymentPurpose).isEqualTo(paymentPurposeUpd)
+        assertThat(updatedPd[1].paymentPurpose).isEqualTo(paymentPurposeUpd)
+    }
+
+    @Test
+    fun `update data via insert method prepared statement`() {
+        val orderNumber = "p555_ps"
+        val orderDate = LocalDate.now()
+        val paymentPurposeIns = "save data via insert method prepared statement"
+        val paymentPurposeUpd = "update data via insert method prepared statement"
+        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+            val insertData = mutableMapOf(
+                PaymentDocumentEntity::paymentPurpose to paymentPurposeIns,
+                PaymentDocumentEntity::orderNumber to orderNumber,
+                PaymentDocumentEntity::orderDate to orderDate,
+                PaymentDocumentEntity::prop15 to "END"
+            )
+
+            saver.addDataForSave(insertData)
+            saver.saveData(insertData.keys)
+            saver.commit()
+        }
+        val savedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
+        assertThat(savedPd.size).isEqualTo(1)
+        val updateData = mutableMapOf(
+            PaymentDocumentEntity::id to savedPd.first().id,
+            PaymentDocumentEntity::paymentPurpose to paymentPurposeUpd,
+            PaymentDocumentEntity::orderNumber to orderNumber,
+            PaymentDocumentEntity::orderDate to orderDate,
+            PaymentDocumentEntity::prop15 to "END"
+        )
+
+        batchInsertionFactory.getSaver(SaverType.UPDATE_PREPARED_STATEMENT).use { saver ->
+            saver.addDataForSave(updateData)
+            saver.saveData(updateData.keys)
+            saver.commit()
+        }
+
+        val updatedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
+        assertThat(updatedPd.size).isGreaterThan(0)
+        assertThat(updatedPd.first().paymentPurpose).isEqualTo(paymentPurposeUpd)
+    }
+
+    @Test
+    fun `update several data via insert method prepared statement`() {
+        val orderNumber = "p666_ps"
+        val orderDate = LocalDate.now()
+        val paymentPurposeIns = "save several data via insert method prepared statement"
+        val paymentPurposeUpd = "update several data via insert method prepared statement"
+        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+            val insertData = mutableMapOf(
+                PaymentDocumentEntity::paymentPurpose to paymentPurposeIns,
+                PaymentDocumentEntity::orderNumber to orderNumber,
+                PaymentDocumentEntity::orderDate to orderDate,
+                PaymentDocumentEntity::prop15 to "END"
+            )
+
+            saver.addDataForSave(insertData)
+            saver.addDataForSave(insertData)
+            saver.saveData(insertData.keys)
+            saver.commit()
+        }
+        val savedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
+        assertThat(savedPd.size).isEqualTo(2)
+        val updateData = mutableMapOf(
+            PaymentDocumentEntity::id to savedPd.first().id,
+            PaymentDocumentEntity::paymentPurpose to paymentPurposeUpd,
+            PaymentDocumentEntity::orderNumber to orderNumber,
+            PaymentDocumentEntity::orderDate to orderDate,
+            PaymentDocumentEntity::prop15 to "END"
+        )
+
+        batchInsertionFactory.getSaver(SaverType.UPDATE_PREPARED_STATEMENT).use { saver ->
             saver.addDataForSave(updateData)
             saver.addDataForSave(updateData.apply { put(PaymentDocumentEntity::id, savedPd[1].id) })
             saver.saveData(updateData.keys)

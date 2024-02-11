@@ -92,6 +92,107 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
         assertThat(updatedDoc.first()[2]).isEqualTo(params.first)
     }
 
+    @ParameterizedTest
+    @MethodSource("getTestData")
+    fun `update saved data via entity prepared statement`(params: Pair<String, String>) {
+        val paymentPurpose = params.first
+        val prop10 = params.second + "8_ps"
+        val accountId = em.createNativeQuery("select id from account limit 1").singleResult.toString()
+        val data = PaymentDocumentEntity(
+            prop15 = "END",
+            paymentPurpose = null,
+            prop10 = prop10,
+        )
+        val dataForInsert = mutableListOf<List<Any?>>()
+        dataForInsert.add(getDataFromEntity(data))
+        processor.insertDataToDataBasePreparedStatement(clazz = PaymentDocumentEntity::class, data = dataForInsert, conn = conn)
+        val savedDoc =
+            em.createNativeQuery("select id, payment_purpose  from payment_document where prop_10 = '$prop10'").resultList as List<Array<Any>>
+        val pdId = savedDoc.first()[0].toString().toLong()
+        assertThat(pdId).isNotNull
+        assertThat(savedDoc.first()[1]).isNull()
+
+        val dataForUpdate = mutableListOf<List<Any?>>()
+        val dataUpdate = PaymentDocumentEntity(
+            account = AccountEntity().apply { id = accountId.toLong() },
+            prop15 = "END",
+            paymentPurpose = paymentPurpose,
+            prop10 = prop10,
+        ).apply { id = pdId }
+        dataForUpdate.add(getDataFromEntity(dataUpdate) + pdId)
+        val conditions = listOf("id")
+        processor.updateDataToDataBasePreparedStatement(
+            clazz = PaymentDocumentEntity::class,
+            data = dataForUpdate,
+            conditionParams = conditions,
+            conn = conn
+        )
+
+        val updatedDoc =
+            em.createNativeQuery("select account_id, prop_15, payment_purpose  from payment_document where prop_10 = '$prop10'").resultList as List<Array<Any>>
+        assertThat(updatedDoc.first()[0].toString()).isEqualTo(accountId)
+        assertThat(updatedDoc.first()[1]).isEqualTo("END")
+        assertThat(updatedDoc.first()[2]).isEqualTo(params.first)
+    }
+
+    @Test
+    fun `update several entity data via insert with prepared statement method`() {
+        val dataForInsert = mutableListOf<List<Any?>>()
+        val paymentPurpose = "Updated purpose"
+        val prop15 = "END_PS_upd"
+        val accountId = em.createNativeQuery("select id from account limit 1").singleResult.toString()
+        val testData = getTestData()
+
+        testData.forEach {
+            val data = PaymentDocumentEntity(
+                prop15 = "NEW_PS_upd",
+                paymentPurpose = null,
+                prop10 = it.second,
+            )
+            dataForInsert.add(getDataFromEntity(data))
+        }
+        processor.insertDataToDataBasePreparedStatement(clazz = PaymentDocumentEntity::class, data = dataForInsert, conn = conn)
+
+        val savedDoc =
+            em.createNativeQuery("select id, payment_purpose, prop_15, prop_10, cur  from payment_document where prop_15 = 'NEW_PS_upd'").resultList as List<Array<Any>>
+        assertThat(savedDoc.size).isEqualTo(testData.size)
+        val pdIds = savedDoc.map { it.first().toString().toLong() }
+        assertThat(pdIds.size).isEqualTo(testData.size)
+        savedDoc.forEach {
+            assertThat(it[1]).isNull()
+        }
+
+        val dataForUpdate = mutableListOf<List<Any?>>()
+        testData.forEachIndexed { idx, d ->
+            dataForUpdate.add(getDataFromEntity(
+                PaymentDocumentEntity(
+                    account = AccountEntity().apply { id = accountId.toLong() },
+                    prop15 = prop15,
+                    paymentPurpose = paymentPurpose,
+                    prop10 = d.second,
+                ).apply { id = pdIds[idx] }
+            ) + pdIds[idx])
+        }
+        val conditions = listOf("id")
+        processor.updateDataToDataBasePreparedStatement(
+            clazz = PaymentDocumentEntity::class,
+            data = dataForUpdate,
+            conditionParams = conditions,
+            conn = conn
+        )
+
+        val updatedDoc =
+            em.createNativeQuery("select account_id, prop_15, prop_10, payment_purpose  from payment_document where prop_15 = '$prop15'").resultList as List<Array<Any>>
+
+        assertThat(updatedDoc.size).isEqualTo(5)
+        testData.forEachIndexed { index, pair ->
+            assertThat(updatedDoc[index][0].toString()).isEqualTo(accountId)
+            assertThat(updatedDoc[index][1]).isEqualTo(prop15)
+            assertThat(updatedDoc[index][2]).isEqualTo(pair.second)
+            assertThat(updatedDoc[index][3]).isEqualTo(paymentPurpose)
+        }
+    }
+
     @Test
     fun `save several entity data via insert method`() {
         val cur = em.createNativeQuery("select code from currency limit 1").singleResult.toString()

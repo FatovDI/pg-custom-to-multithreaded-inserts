@@ -1,6 +1,7 @@
 package com.example.postgresqlinsertion.batchinsertion.impl.processor
 
 import com.example.postgresqlinsertion.batchinsertion.*
+import com.example.postgresqlinsertion.batchinsertion.api.processor.DataForUpdate
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import org.postgresql.PGConnection
 import org.postgresql.copy.CopyManager
@@ -281,5 +282,26 @@ abstract class AbstractBatchInsertionProcessor {
                 }
             )
         }
+    }
+
+    /**
+     * save list data with update method
+     * @param dataForUpdate - data class with data for update
+     * @param conn - DB connection
+     */
+    fun updateDataToDataBasePreparedStatement(dataForUpdate: DataForUpdate, conn: Connection): Int {
+
+        return conn.prepareStatement(
+            "UPDATE ${dataForUpdate.tableName} SET ${dataForUpdate.columns.joinToString(", ") { "$it=?" }} where ${dataForUpdate.conditions.joinToString { "$it=? " }}"
+        ).use { stmt ->
+            dataForUpdate.data.forEach { str ->
+                str.forEachIndexed { idx, col ->
+                    stmt.setObject(idx + 1, col)
+                }
+                stmt.addBatch()
+            }
+            stmt.executeBatch()
+        }.sumOf { it }
+
     }
 }
