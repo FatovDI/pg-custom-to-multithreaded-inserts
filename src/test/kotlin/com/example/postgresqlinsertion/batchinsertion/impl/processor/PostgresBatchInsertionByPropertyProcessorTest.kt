@@ -254,7 +254,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
 
     @Test
     fun `save data with null value via insert method`() {
-        val prop10 = "777"
+        val prop10 = "777_null"
         val data = mutableMapOf<KMutableProperty1<out BaseEntity, *>, String?>(
             PaymentDocumentEntity::account to null,
             PaymentDocumentEntity::prop15 to "END",
@@ -281,7 +281,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
 
     @Test
     fun `save data with incorrect value via insert method`() {
-        val prop10 = "777"
+        val prop10 = "777_incor"
         val data = mutableMapOf<KMutableProperty1<out BaseEntity, *>, String?>(
             PaymentDocumentEntity::account to "1",
             PaymentDocumentEntity::prop15 to "END",

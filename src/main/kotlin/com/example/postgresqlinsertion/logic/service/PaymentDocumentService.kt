@@ -410,7 +410,7 @@ class PaymentDocumentService(
 
         val scriptForCreateIndexes = sqlHelper.dropIndex(PaymentDocumentEntity::class)
 
-        pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT).use { saver ->
+        pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
             for (i in 0 until count) {
                 saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
             }

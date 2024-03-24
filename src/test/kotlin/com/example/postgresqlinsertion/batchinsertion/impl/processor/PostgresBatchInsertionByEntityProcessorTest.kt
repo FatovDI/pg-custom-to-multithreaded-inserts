@@ -184,7 +184,7 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
         val updatedDoc =
             em.createNativeQuery("select account_id, prop_15, prop_10, payment_purpose  from payment_document where prop_15 = '$prop15'").resultList as List<Array<Any>>
 
-        assertThat(updatedDoc.size).isEqualTo(5)
+        assertThat(updatedDoc.size).isEqualTo(testData.size)
         testData.forEachIndexed { index, pair ->
             assertThat(updatedDoc[index][0].toString()).isEqualTo(accountId)
             assertThat(updatedDoc[index][1]).isEqualTo(prop15)
@@ -525,7 +525,10 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
                 Pair("бла бла | бла блабла", "333"),
                 Pair("б`л~а !б@л#а№;ж\$s%u ^s p &l? z* (d)- _s+= /W\\|{we}[ct]a,r<cs.>w's", "444"),
                 Pair("бла\b бла \n бла \r бла \tбла бла", "555"),
-                Pair("select id from account limit 1", "666")
+                Pair("select id from account limit 1", "666"),
+                Pair("'select id from account limit 1'", "777"),
+                Pair("'select id from account limit 1", "888"),
+                Pair("--select id from account limit 1", "999"),
             )
         }
 

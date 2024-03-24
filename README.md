@@ -1,4 +1,4 @@
-# Acceleration Insertion for PostgreSQL - Jpoint2024 🚀
+# Acceleration Insertion for PostgreSQL - PgConf2024 🚀
 
 ## **Description**
 
@@ -66,19 +66,22 @@ http://localhost:8080/test-insertion/spring-save-all/{count}
 # Insert using Spring with manual persisting
 http://localhost:8080/test-insertion/spring-with-manual-persisting/{count}
 
-# Update using Spring (Data saved on 100,000 rows)
+# Update using Spring
 http://localhost:8080/test-insertion/spring-update/{count}
 
-# Create data using the INSERT method. The data will be saved in batches of 100,000 rows.
+# Create data using the INSERT method. The data will be saved in batches of 5,000 rows.
 http://localhost:8080/test-insertion/insert/{count}
+
+# Create data using the INSERT method with prepared statement. The data will be saved in batches of 5,000 rows.
+http://localhost:8080/test-insertion/insert-prepared-statement/{count}
 
 # Create data using the INSERT method with KProperty map.
 http://localhost:8080/test-insertion/insert-by-property/{count}
 
-# Create data using the INSERT method with dropping index before transaction and recreating it after that. The data will be saved in batches of 100,000 rows.
+# Create data using the INSERT method with prepared statement and dropping index before transaction and recreating it after that. The data will be saved in batches of 5,000 rows.
 http://localhost:8080/test-insertion/insert-with-drop-index/{count}
 
-# Create data using the COPY method without saving file to disk. The data will be saved in batches of 100,000 rows.
+# Create data using the COPY method without saving file to disk. The data will be saved in batches of 5,000 rows.
 http://localhost:8080/test-insertion/copy/{count}
 
 # Create data with KProperty map using the COPY method without saving file to disk.

@@ -224,7 +224,7 @@ class PaymentDocumentInsertionController(
         @PathVariable orderNumber: String,
         @RequestParam prop10: String
     ): ResponseDto {
-        var count = 0
+        var count: Int
         val time = measureTimeMillis {
             count = service.updateOnlyOneFieldWithCommonCondition(orderNumber, prop10)
         }

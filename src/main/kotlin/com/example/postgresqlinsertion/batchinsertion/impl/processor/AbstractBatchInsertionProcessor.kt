@@ -243,7 +243,7 @@ abstract class AbstractBatchInsertionProcessor {
      * save list data with insert method and prepared statement
      * @param tableName - table name in DB
      * @param columns - list of columns
-     * @param data - list of string
+     * @param data - list of data by columns
      * @param conn - DB connection
      */
     fun insertDataToDataBasePreparedStatement(tableName: String, columns: List<String>, data: List<List<Any?>>, conn: Connection) {
