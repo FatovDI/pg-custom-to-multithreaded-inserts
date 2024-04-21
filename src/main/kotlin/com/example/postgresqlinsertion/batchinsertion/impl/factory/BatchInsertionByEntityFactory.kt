@@ -35,6 +35,7 @@ abstract class BatchInsertionByEntityFactory<E: BaseEntity>(
             SaverType.COPY_BINARY_VIA_FILE -> CopyBinaryViaFileByEntitySaver(processor, entityClass, conn, batchSize)
             SaverType.INSERT -> InsertByEntitySaver(processor, entityClass, conn, batchSize)
             SaverType.INSERT_PREPARED_STATEMENT -> InsertByEntityPreparedStatementSaver(processor, entityClass, conn, batchSize)
+            SaverType.INSERT_PREPARED_STATEMENT_UNNEST -> InsertByEntityPSUnnestSaver(processor, entityClass, conn, batchSize)
             SaverType.UPDATE -> UpdateByEntitySaver(processor, entityClass, conn, batchSize)
             SaverType.UPDATE_PREPARED_STATEMENT -> UpdateByEntityPreparedStatementSaver(processor, entityClass, conn, batchSize)
         }

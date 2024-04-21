@@ -90,6 +90,14 @@ interface BatchInsertionByEntityProcessor{
     fun insertDataToDataBasePreparedStatement(clazz: KClass<out BaseEntity>, data: List<List<Any?>>, conn: Connection)
 
     /**
+     * save list data with insert method and prepared statement and select data by unnest
+     * @param clazz - entity class
+     * @param data - list of string by columns
+     * @param conn - DB connection
+     */
+    fun insertDataToDataBasePreparedStatementAndUnnest(clazz: KClass<out BaseEntity>, data: List<List<*>>, conn: Connection)
+
+    /**
      * save list data with update method
      * @param clazz - entity class
      * @param data - list of string

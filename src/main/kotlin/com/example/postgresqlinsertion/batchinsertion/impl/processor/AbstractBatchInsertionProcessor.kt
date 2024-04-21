@@ -6,7 +6,9 @@ import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import org.postgresql.PGConnection
 import org.postgresql.copy.CopyManager
 import org.postgresql.core.BaseConnection
-import java.io.*
+import java.io.DataOutputStream
+import java.io.InputStream
+import java.io.Reader
 import java.math.BigDecimal
 import java.sql.Connection
 import java.time.LocalDate
@@ -85,16 +87,6 @@ abstract class AbstractBatchInsertionProcessor {
      */
     fun insertDataToDataBase(clazz: KClass<out BaseEntity>, data: List<String>, conn: Connection) {
         insertDataToDataBase(getTableName(clazz), getColumnsStringByClass(clazz), data, conn)
-    }
-
-    /**
-     * save list data with insert method and prepared statement
-     * @param clazz - entity class
-     * @param data - list of string by columns
-     * @param conn - DB connection
-     */
-    fun insertDataToDataBasePreparedStatement(clazz: KClass<out BaseEntity>, data: List<List<Any?>>, conn: Connection) {
-        insertDataToDataBasePreparedStatement(getTableName(clazz), getColumnsByClass(clazz), data, conn)
     }
 
     /**
@@ -265,6 +257,41 @@ abstract class AbstractBatchInsertionProcessor {
             stmt.executeLargeUpdate()
         }
     }
+
+    /**
+     * save list data with insert method and prepared statement and select data by unnest
+     * @param tableName - table name in DB
+     * @param columns - list of columns
+     * @param data - list of data by columns
+     * @param conn - DB connection
+     */
+    fun insertDataToDataBasePreparedStatementAndUnnest(tableName: String, columns: List<String>, data: List<List<*>>, conn: Connection) {
+
+        val params = columns.joinToString(", ") { "?" }
+
+        val pgTypeNames = conn.prepareStatement(
+            "INSERT INTO $tableName (${columns.joinToString(",")}) VALUES ($params)"
+        ).use { stmt ->
+            List(columns.size) { idx -> stmt.parameterMetaData.getParameterTypeName(idx + 1) }
+        }
+
+        conn.prepareStatement(
+            "INSERT INTO $tableName (${columns.joinToString(",")}) SELECT * FROM unnest($params)"
+        ).use { stmt ->
+
+            var idx = 0
+            columns.forEachIndexed { idxCol, s ->
+                val arr = data.map { str ->
+                    str[idxCol]
+                }.toTypedArray()
+                idx++
+                stmt.setArray(idx, stmt.connection.createArrayOf(pgTypeNames[idxCol], arr))
+            }
+            stmt.executeLargeUpdate()
+        }
+
+    }
+
 
     /**
      * save list data with update method

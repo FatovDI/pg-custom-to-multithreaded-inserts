@@ -135,6 +135,21 @@ class PaymentDocumentInsertionController(
         )
     }
 
+    @PostMapping("/insert-prepared-statement-unnest/{count}")
+    fun insertViaInsertWithPreparedStatementUnnest(
+        @PathVariable count: Int,
+        @RequestParam orderNumber: String? = null
+    ): ResponseDto {
+        val time = measureTimeMillis {
+            service.saveByInsertWithPreparedStatementAndUnnest(count, orderNumber)
+        }
+        return ResponseDto(
+            name = "Insert method with prepared statement and unnest",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
     @PostMapping("/update/{count}")
     fun update(@PathVariable count: Int): ResponseDto {
         val time = measureTimeMillis {

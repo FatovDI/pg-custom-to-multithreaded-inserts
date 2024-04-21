@@ -45,6 +45,29 @@ class PostgresBatchInsertionByEntityProcessor(
         saveToDataBaseByCopyMethod(clazz, from, delimiter, nullValue, conn)
     }
 
+    /**
+     * save list data with insert method and prepared statement
+     * @param clazz - entity class
+     * @param data - list of string by columns
+     * @param conn - DB connection
+     */
+    override fun insertDataToDataBasePreparedStatement(
+        clazz: KClass<out BaseEntity>,
+        data: List<List<Any?>>,
+        conn: Connection
+    ) {
+        insertDataToDataBasePreparedStatement(getTableName(clazz), getColumnsByClass(clazz), data, conn)
+    }
+
+
+    override fun insertDataToDataBasePreparedStatementAndUnnest(
+        clazz: KClass<out BaseEntity>,
+        data: List<List<Any?>>,
+        conn: Connection
+    ) {
+        insertDataToDataBasePreparedStatementAndUnnest(getTableName(clazz), getColumnsByClass(clazz), data, conn)
+    }
+
     override fun updateDataToDataBasePreparedStatement(
         clazz: KClass<out BaseEntity>,
         data: List<List<Any?>>,

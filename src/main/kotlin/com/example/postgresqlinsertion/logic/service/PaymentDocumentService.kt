@@ -212,12 +212,24 @@ class PaymentDocumentService(
 
     }
 
-
     fun saveByInsertWithPreparedStatement(count: Int, orderNumber: String? = null) {
         val currencies = currencyRepo.findAll()
         val accounts = accountRepo.findAll()
 
         pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
+            for (i in 0 until count) {
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber))
+            }
+            saver.commit()
+        }
+
+    }
+
+    fun saveByInsertWithPreparedStatementAndUnnest(count: Int, orderNumber: String? = null) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+
+        pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT_UNNEST).use { saver ->
             for (i in 0 until count) {
                 saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber))
             }

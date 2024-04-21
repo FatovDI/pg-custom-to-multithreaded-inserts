@@ -22,7 +22,7 @@ fun getDataFromEntity(entity: BaseEntity) =
     }
 
 fun getDataFromEntityByField(entity: BaseEntity, field: Field) =
-    when (val obj: Any? = field.get(entity)) {
+    when (val obj = field.get(entity)) {
         null -> null
         is BaseEntity -> {
             field.annotations
