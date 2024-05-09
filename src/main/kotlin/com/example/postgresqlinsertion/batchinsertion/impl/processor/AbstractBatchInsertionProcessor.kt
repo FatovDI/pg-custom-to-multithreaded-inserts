@@ -263,20 +263,19 @@ abstract class AbstractBatchInsertionProcessor {
      * @param tableName - table name in DB
      * @param columns - list of columns
      * @param data - list of data by columns
+     * @param pgTypes - list of pg types
      * @param conn - DB connection
      */
-    fun insertDataToDataBasePreparedStatementAndUnnest(tableName: String, columns: List<String>, data: List<List<*>>, conn: Connection) {
-
-        val params = columns.joinToString(", ") { "?" }
-
-        val pgTypeNames = conn.prepareStatement(
-            "INSERT INTO $tableName (${columns.joinToString(",")}) VALUES ($params)"
-        ).use { stmt ->
-            List(columns.size) { idx -> stmt.parameterMetaData.getParameterTypeName(idx + 1) }
-        }
+    fun insertDataToDataBasePreparedStatementAndUnnest(
+        tableName: String,
+        columns: List<String>,
+        data: List<List<*>>,
+        pgTypes: List<String>,
+        conn: Connection
+    ) {
 
         conn.prepareStatement(
-            "INSERT INTO $tableName (${columns.joinToString(",")}) SELECT * FROM unnest($params)"
+            "INSERT INTO $tableName (${columns.joinToString(",")}) SELECT * FROM unnest(${columns.joinToString(", ") { "?" }})"
         ).use { stmt ->
 
             var idx = 0
@@ -285,13 +284,29 @@ abstract class AbstractBatchInsertionProcessor {
                     str[idxCol]
                 }.toTypedArray()
                 idx++
-                stmt.setArray(idx, stmt.connection.createArrayOf(pgTypeNames[idxCol], arr))
+                stmt.setArray(idx, stmt.connection.createArrayOf(pgTypes[idxCol], arr))
             }
             stmt.executeLargeUpdate()
         }
 
     }
 
+    /**
+     * get pg types by columns
+     * @param tableName - table name in DB
+     * @param columns - list of columns
+     * @param conn - DB connection
+     * @return List<String> - list with pg type name
+     */
+    fun getPgTypes(tableName: String, columns: List<String>, conn: Connection): List<String>  {
+
+        return conn.prepareStatement(
+            "INSERT INTO $tableName (${columns.joinToString(",")}) VALUES (${columns.joinToString(", ") { "?" }})"
+        ).use { stmt ->
+            List(columns.size) { idx -> stmt.parameterMetaData.getParameterTypeName(idx + 1) }
+        }
+
+    }
 
     /**
      * save list data with update method

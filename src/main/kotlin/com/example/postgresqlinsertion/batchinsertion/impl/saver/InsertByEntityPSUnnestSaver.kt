@@ -14,6 +14,7 @@ open class InsertByEntityPSUnnestSaver<E: BaseEntity>(
 ) : AbstractBatchInsertionByEntitySaver<E>(conn, batchSize) {
 
     private val dataForInsert = mutableListOf<List<Any?>>()
+    private val pgTypes = processor.getPgTypes(entityClass, conn)
 
     override fun addDataForSave(entity: E) {
         dataForInsert.add(getDataFromEntity(entity))
@@ -21,7 +22,7 @@ open class InsertByEntityPSUnnestSaver<E: BaseEntity>(
     }
 
     override fun saveData() {
-        processor.insertDataToDataBasePreparedStatementAndUnnest(entityClass, dataForInsert, conn)
+        processor.insertDataToDataBasePreparedStatementAndUnnest(entityClass, dataForInsert, pgTypes, conn)
         dataForInsert.clear()
     }
 }

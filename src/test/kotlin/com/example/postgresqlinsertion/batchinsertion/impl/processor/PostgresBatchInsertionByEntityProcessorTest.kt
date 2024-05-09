@@ -308,6 +308,7 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
         val dataForInsert = mutableListOf<List<*>>()
         val testData = getTestData()
         val prop15 = "NEW_PS_UNNEST"
+        val pgTypes = processor.getPgTypes(clazz = PaymentDocumentEntity::class, conn = conn)
 
         testData.forEach {
             val data = PaymentDocumentEntity(
@@ -318,7 +319,12 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
             )
             dataForInsert.add(getDataFromEntity(data))
         }
-        processor.insertDataToDataBasePreparedStatementAndUnnest(clazz = PaymentDocumentEntity::class, data = dataForInsert, conn = conn)
+        processor.insertDataToDataBasePreparedStatementAndUnnest(
+            clazz = PaymentDocumentEntity::class,
+            data = dataForInsert,
+            pgTypes = pgTypes,
+            conn = conn
+        )
 
         val savedDoc =
             em.createNativeQuery("select payment_purpose, prop_15, prop_10, cur  from payment_document where prop_15 = '$prop15' and cur = '$cur'").resultList as List<Array<Any>>
@@ -336,6 +342,7 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
         val dataForInsert = mutableListOf<List<Any?>>()
         val prop10 = "7171_PS_UN"
         val accountId = em.createNativeQuery("select id from account limit 1").singleResult.toString()
+        val pgTypes = processor.getPgTypes(clazz = PaymentDocumentEntity::class, conn = conn)
         dataForInsert.add(
             getDataFromEntity(
                 PaymentDocumentEntity(
@@ -353,7 +360,12 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
             )
         )
 
-        processor.insertDataToDataBasePreparedStatementAndUnnest(clazz = PaymentDocumentEntity::class, data = dataForInsert, conn = conn)
+        processor.insertDataToDataBasePreparedStatementAndUnnest(
+            clazz = PaymentDocumentEntity::class,
+            data = dataForInsert,
+            pgTypes = pgTypes,
+            conn = conn
+        )
 
         val savedDoc = em.createNativeQuery(
             """

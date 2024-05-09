@@ -63,9 +63,20 @@ class PostgresBatchInsertionByEntityProcessor(
     override fun insertDataToDataBasePreparedStatementAndUnnest(
         clazz: KClass<out BaseEntity>,
         data: List<List<Any?>>,
+        pgTypes: List<String>,
         conn: Connection
     ) {
-        insertDataToDataBasePreparedStatementAndUnnest(getTableName(clazz), getColumnsByClass(clazz), data, conn)
+        insertDataToDataBasePreparedStatementAndUnnest(getTableName(clazz), getColumnsByClass(clazz), data, pgTypes, conn)
+    }
+
+    /**
+     * get pg types by columns
+     * @param clazz - entity class
+     * @param conn - DB connection
+     * @return List<String> - list with pg type name
+     */
+    override fun getPgTypes(clazz: KClass<out BaseEntity>, conn: Connection): List<String> {
+        return getPgTypes(getTableName(clazz), getColumnsByClass(clazz), conn)
     }
 
     override fun updateDataToDataBasePreparedStatement(

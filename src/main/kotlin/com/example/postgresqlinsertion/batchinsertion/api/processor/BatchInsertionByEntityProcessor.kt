@@ -93,9 +93,23 @@ interface BatchInsertionByEntityProcessor{
      * save list data with insert method and prepared statement and select data by unnest
      * @param clazz - entity class
      * @param data - list of string by columns
+     * @param pgTypes - list of pg types
      * @param conn - DB connection
      */
-    fun insertDataToDataBasePreparedStatementAndUnnest(clazz: KClass<out BaseEntity>, data: List<List<*>>, conn: Connection)
+    fun insertDataToDataBasePreparedStatementAndUnnest(
+        clazz: KClass<out BaseEntity>,
+        data: List<List<*>>,
+        pgTypes: List<String>,
+        conn: Connection
+    )
+
+    /**
+     * get pg types by columns
+     * @param clazz - entity class
+     * @param conn - DB connection
+     * @return List<String> - list with pg type name
+     */
+    fun getPgTypes(clazz: KClass<out BaseEntity>, conn: Connection): List<String>
 
     /**
      * save list data with update method
