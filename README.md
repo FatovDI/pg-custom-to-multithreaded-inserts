@@ -1,4 +1,4 @@
-# Acceleration Insertion for PostgreSQL - PgConf2024 🚀
+# Acceleration Insertion for PostgreSQL - Sta4ka 2024 🚀
 
 ## **Description**
 
