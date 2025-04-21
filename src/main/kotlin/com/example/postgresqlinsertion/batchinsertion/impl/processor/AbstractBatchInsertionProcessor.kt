@@ -195,12 +195,7 @@ abstract class AbstractBatchInsertionProcessor {
      * @param from - input stream with data for save
      * @param conn - DB connection
      */
-    fun saveBinaryToDataBaseByCopyMethod(
-        tableName: String,
-        columns: String,
-        from: InputStream,
-        conn: Connection
-    ) {
+    fun saveBinaryToDataBaseByCopyMethod(tableName: String, columns: String, from: InputStream, conn: Connection) {
 
         if (conn.isWrapperFor(BaseConnection::class.java)) {
             val copyManager = CopyManager(conn.unwrap(BaseConnection::class.java))
@@ -238,7 +233,7 @@ abstract class AbstractBatchInsertionProcessor {
      * @param data - list of data by columns
      * @param conn - DB connection
      */
-    fun insertDataToDataBasePreparedStatement(tableName: String, columns: List<String>, data: List<List<Any?>>, conn: Connection) {
+    fun insertDataToDataBasePreparedStatement(tableName: String, columns: List<String>, data: List<Collection<Any?>>, conn: Connection) {
 
         val params = columns.joinToString(", ") { "?" }
 

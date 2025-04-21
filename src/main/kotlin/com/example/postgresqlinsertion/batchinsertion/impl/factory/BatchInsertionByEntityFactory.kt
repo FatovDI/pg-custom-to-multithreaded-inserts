@@ -4,10 +4,12 @@ import com.example.postgresqlinsertion.batchinsertion.api.factory.BatchInsertion
 import com.example.postgresqlinsertion.batchinsertion.api.factory.SaverType
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByEntityProcessor
 import com.example.postgresqlinsertion.batchinsertion.api.saver.BatchInsertionByEntitySaver
+import com.example.postgresqlinsertion.batchinsertion.impl.repository.ConcurrentSaverHandler
 import com.example.postgresqlinsertion.batchinsertion.impl.saver.*
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import java.util.concurrent.Executors
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 
@@ -18,11 +20,21 @@ abstract class BatchInsertionByEntityFactory<E: BaseEntity>(
     @Value("\${batch_insertion.batch_size}")
     private var batchSize: Int = 100
 
+    @Value("\${batch_insertion.pool_size}")
+    private var poolSize: Int = 4
+
+    @Value("\${batch_insertion.concurrent_saves}")
+    private var concurrentSavers: Int = 1
+
     @Autowired
     override lateinit var processor: BatchInsertionByEntityProcessor
 
     @Autowired
     override lateinit var dataSource: DataSource
+
+    private val executorService by lazy {
+        Executors.newFixedThreadPool(poolSize)
+    }
 
     override fun getSaver(type: SaverType): BatchInsertionByEntitySaver<E> {
 
@@ -33,6 +45,7 @@ abstract class BatchInsertionByEntityFactory<E: BaseEntity>(
             SaverType.COPY_BINARY -> CopyBinaryByEntitySaver(processor, entityClass, conn, batchSize)
             SaverType.COPY_VIA_FILE -> CopyViaFileByEntitySaver(processor, entityClass, conn, batchSize)
             SaverType.COPY_BINARY_VIA_FILE -> CopyBinaryViaFileByEntitySaver(processor, entityClass, conn, batchSize)
+            SaverType.COPY_CONCURRENT -> ConcurrentSaverHandler(processor, entityClass, dataSource, batchSize, concurrentSavers, executorService)
             SaverType.INSERT -> InsertByEntitySaver(processor, entityClass, conn, batchSize)
             SaverType.INSERT_PREPARED_STATEMENT -> InsertByEntityPreparedStatementSaver(processor, entityClass, conn, batchSize)
             SaverType.INSERT_PREPARED_STATEMENT_UNNEST -> InsertByEntityPSUnnestSaver(processor, entityClass, conn, batchSize)

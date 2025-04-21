@@ -5,8 +5,6 @@ import com.example.postgresqlinsertion.batchinsertion.api.factory.BatchInsertion
 import com.example.postgresqlinsertion.batchinsertion.api.factory.BatchInsertionByPropertyFactory
 import com.example.postgresqlinsertion.batchinsertion.api.factory.SaverType
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByPropertyProcessor
-import com.example.postgresqlinsertion.batchinsertion.getColumnsString
-import com.example.postgresqlinsertion.batchinsertion.getColumnsStringByClass
 import com.example.postgresqlinsertion.batchinsertion.utils.getRandomString
 import com.example.postgresqlinsertion.batchinsertion.utils.logger
 import com.example.postgresqlinsertion.logic.entity.AccountEntity
@@ -14,19 +12,14 @@ import com.example.postgresqlinsertion.logic.entity.CurrencyEntity
 import com.example.postgresqlinsertion.logic.entity.PaymentDocumentEntity
 import com.example.postgresqlinsertion.logic.repository.AccountRepository
 import com.example.postgresqlinsertion.logic.repository.CurrencyRepository
-import com.example.postgresqlinsertion.logic.repository.PaymentDocumentCrudRepository
 import com.example.postgresqlinsertion.logic.repository.PaymentDocumentCustomRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceContext
 import javax.sql.DataSource
-import javax.transaction.Transactional
 import kotlin.random.Random
 import kotlin.reflect.KMutableProperty1
 
@@ -41,17 +34,24 @@ class PaymentDocumentService(
     private val pdBatchByEntitySaverFactory: BatchInsertionByEntityFactory<PaymentDocumentEntity>,
     private val pdBatchByPropertySaverFactory: BatchInsertionByPropertyFactory<PaymentDocumentEntity>,
     private val pdCustomRepository: PaymentDocumentCustomRepository,
-    private val jdbcTemplate: JdbcTemplate,
-    private val namedJdbcTemplate: NamedParameterJdbcTemplate,
-    private val pdCrudRepository: PaymentDocumentCrudRepository,
     private val byPropertyProcessor: BatchInsertionByPropertyProcessor,
     private val dataSource: DataSource,
 ) {
 
-    @PersistenceContext
-    lateinit var entityManager: EntityManager
-
     private val log by logger()
+
+    fun saveByCopyConcurrent(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+
+        pdBatchByEntitySaverFactory.getSaver(SaverType.COPY_CONCURRENT).use { saver ->
+            for (i in 0 until count) {
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
+            }
+            saver.commit()
+        }
+
+    }
 
     fun saveByCopy(count: Int) {
         val currencies = currencyRepo.findAll()
@@ -437,205 +437,6 @@ class PaymentDocumentService(
 
     }
 
-    @Transactional
-    fun saveAllBySpring(count: Int) {
-        val currencies = currencyRepo.findAll()
-        val accounts = accountRepo.findAll()
-
-        log.info("start saveAll $count via spring")
-
-        (1..count)
-            .map {  getRandomEntity(null, currencies.random(), accounts.random()) }
-            .let {
-
-                log.info("start call saveAll method $count via spring")
-
-                pdCustomRepository.saveAll(it)
-            }
-
-        log.info("end saveAll $count via spring")
-
-    }
-
-    @Transactional
-    fun saveBySpring(count: Int) {
-        val currencies = currencyRepo.findAll()
-        val accounts = accountRepo.findAll()
-
-        log.info("start save $count by Spring")
-        for (i in 0 until count) {
-            pdCustomRepository.save(
-                getRandomEntity(null, currencies.random(), accounts.random())
-            )
-        }
-        log.info("end save $count by Spring")
-    }
-
-    @Transactional
-    fun saveBySpringWithManualPersisting(count: Int) {
-        val currencies = currencyRepo.findAll()
-        val accounts = accountRepo.findAll()
-
-        log.info("start save $count by Spring with manual persisting")
-
-        for (i in 0 until count) {
-            entityManager.persist(getRandomEntity(null, currencies.random(), accounts.random()))
-            if (i != 0 && i % batchSize == 0) {
-                log.info("save batch $batchSize by Spring with manual persisting")
-                entityManager.flush()
-                entityManager.clear()
-            }
-        }
-
-        log.info("end save $count by Spring with manual persisting")
-
-    }
-
-    @Transactional
-    fun saveByCopyViaSpring(count: Int) {
-        val currencies = currencyRepo.findAll()
-        val accounts = accountRepo.findAll()
-
-        log.info("start save by copy $count via spring")
-
-        for (i in 0 until count) {
-            pdCustomRepository.saveByCopy(getRandomEntity(null, currencies.random(), accounts.random()))
-        }
-
-        log.info("end save by copy $count via spring")
-
-    }
-
-    @Transactional
-    fun saveByCopyConcurrentViaSpring(count: Int) {
-        val currencies = currencyRepo.findAll()
-        val accounts = accountRepo.findAll()
-
-        log.info("start save by copy concurrent $count via Spring")
-
-        for (i in 0 until count) {
-            pdCustomRepository.saveByCopyConcurrent(getRandomEntity(null, currencies.random(), accounts.random()))
-        }
-
-        log.info("end save by copy concurrent $count via Spring")
-
-    }
-
-    @Transactional
-    fun saveAllByCopyViaSpring(count: Int) {
-        val currencies = currencyRepo.findAll()
-        val accounts = accountRepo.findAll()
-
-        log.info("start save all by copy $count via Spring")
-
-        (1..count)
-            .map {getRandomEntity(null, currencies.random(), accounts.random())}
-            .let { pdCustomRepository.saveAllByCopy(it) }
-
-        log.info("end save all by copy $count via Spring")
-
-    }
-
-    @Transactional
-    fun saveByCrudRepositorySpring(count: Int) {
-        val currencies = currencyRepo.findAll()
-        val accounts = accountRepo.findAll()
-
-        log.info("start save by crud repository Spring $count")
-
-        for (i in 0 until count) {
-            pdCrudRepository.save(getRandomEntity(null, currencies.random(), accounts.random()))
-        }
-
-        log.info("end save by crud repository Spring $count")
-
-    }
-
-    @Transactional
-    fun saveByJdbcTemplateSpring(count: Int) {
-        val currencies = currencyRepo.findAll()
-        val accounts = accountRepo.findAll()
-
-        log.info("start save by jdbcTemplate $count")
-
-        val batch = mutableListOf<Array<Any?>>()
-        val data = mutableMapOf<KMutableProperty1<PaymentDocumentEntity, *>, Any?>()
-        val sql = mutableMapOf<KMutableProperty1<PaymentDocumentEntity, *>, Any?>()
-            .apply { fillRandomDataByKProperty(null, currencies.random(), accounts.random(), this) }
-            .let { "INSERT INTO payment_document (${getColumnsString(it.keys)}) VALUES (${it.keys.joinToString { "?" }})" }
-
-        for (i in 0 until count) {
-
-            fillRandomDataByKProperty(null, currencies.random(), accounts.random(), data)
-            batch.add(data.values.toTypedArray())
-            if (i != 0 && i % batchSize == 0) {
-                log.info("save batch $batchSize by jdbcTemplate")
-                jdbcTemplate.batchUpdate(sql, batch)
-                batch.clear()
-            }
-
-        }
-
-        if (batch.size != 0) {
-            jdbcTemplate.batchUpdate(sql, batch)
-        }
-
-        log.info("end save by jdbcTemplate $count")
-
-    }
-
-    @Transactional
-    fun saveByNamedJdbcTemplateSpring(count: Int) {
-        val currencies = currencyRepo.findAll()
-        val accounts = accountRepo.findAll()
-
-        log.info("start save by namedJdbcTemplate $count")
-
-        val columns = PaymentDocumentEntity::class.java.declaredFields.joinToString(",") { ":${it.name}" }
-
-        // todo разобраться почему не работает с PaymentDocumentEntity.
-        val batch = mutableListOf<PaymentDocumentEntity>()
-
-        for (i in 0 until count) {
-
-            batch.add(getRandomEntity(null, currencies.random(), accounts.random()))
-            if (i != 0 && i % batchSize == 0) {
-                log.info("save batch $batchSize by namedJdbcTemplate")
-                namedJdbcTemplate.batchUpdate(
-                    "INSERT INTO payment_document (${getColumnsStringByClass(PaymentDocumentEntity::class)}) VALUES ($columns)",
-                    SqlParameterSourceUtils.createBatch(batch)
-                )
-                batch.clear()
-            }
-
-        }
-
-        if (batch.size != 0) {
-            namedJdbcTemplate.batchUpdate(
-                "INSERT INTO payment_document VALUES ($columns)",
-                SqlParameterSourceUtils.createBatch(batch)
-            )
-        }
-
-        log.info("end save by namedJdbcTemplate $count")
-
-    }
-
-    @Transactional
-    fun updateBySpring(count: Int) {
-        val listId = sqlHelper.getIdListForUpdate(count, PaymentDocumentEntity::class)
-        val currencies = currencyRepo.findAll()
-        val accounts = accountRepo.findAll()
-
-        log.info("start update $count via spring")
-
-        for (i in 0 until count) {
-            pdCustomRepository.save(getRandomEntity(listId[i], currencies.random(), accounts.random()))
-        }
-
-        log.info("end update $count via spring")
-
-    }
 
     fun findAllByOrderNumberAndOrderDate(orderNumber: String, orderDate: LocalDate): List<PaymentDocumentEntity> {
         return pdCustomRepository.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)

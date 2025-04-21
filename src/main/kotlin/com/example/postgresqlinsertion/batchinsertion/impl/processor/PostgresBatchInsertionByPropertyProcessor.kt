@@ -1,10 +1,8 @@
 package com.example.postgresqlinsertion.batchinsertion.impl.processor
 
+import com.example.postgresqlinsertion.batchinsertion.*
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByPropertyProcessor
 import com.example.postgresqlinsertion.batchinsertion.api.processor.DataForUpdate
-import com.example.postgresqlinsertion.batchinsertion.getColumnName
-import com.example.postgresqlinsertion.batchinsertion.getColumnsString
-import com.example.postgresqlinsertion.batchinsertion.getTableName
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import org.springframework.stereotype.Component
 import java.io.BufferedWriter
@@ -75,6 +73,33 @@ class PostgresBatchInsertionByPropertyProcessor(
         conn: Connection
     ) {
         insertDataToDataBase(getTableName(clazz), getColumnsString(columns), data, conn)
+    }
+
+    override fun insertDataToDataBasePreparedStatement(
+        clazz: KClass<out BaseEntity>,
+        columns: Set<KProperty1<out BaseEntity, *>>,
+        data: List<List<Any?>>,
+        conn: Connection
+    ) {
+        insertDataToDataBasePreparedStatement(getTableName(clazz), getColumns(columns), data, conn)
+    }
+
+    override fun insertDataToDataBasePreparedStatementAndUnnest(
+        clazz: KClass<out BaseEntity>,
+        columns: Set<KProperty1<out BaseEntity, *>>,
+        data: List<List<*>>,
+        pgTypes: List<String>,
+        conn: Connection
+    ) {
+        return insertDataToDataBasePreparedStatementAndUnnest(getTableName(clazz), getColumns(columns), data, pgTypes, conn)
+    }
+
+    override fun getPgTypes(
+        clazz: KClass<out BaseEntity>,
+        columns: Set<KProperty1<out BaseEntity, *>>,
+        conn: Connection
+    ): List<String> {
+        return getPgTypes(getTableName(clazz), getColumns(columns), conn)
     }
 
     override fun updateDataToDataBase(

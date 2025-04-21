@@ -23,6 +23,18 @@ class PaymentDocumentInsertionController(
         )
     }
 
+    @PostMapping("/copy-concurrent/{count}")
+    fun insertViaCopyConcurrent(@PathVariable count: Int): ResponseDto {
+        val time = measureTimeMillis {
+            service.saveByCopyConcurrent(count)
+        }
+        return ResponseDto(
+            name = "Copy concurrent method",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
     @PostMapping("/copy-by-binary/{count}")
     fun insertViaCopyByBinary(@PathVariable count: Int): ResponseDto {
         val time = measureTimeMillis {
@@ -262,125 +274,6 @@ class PaymentDocumentInsertionController(
         )
     }
 
-    @PostMapping("/spring/{count}")
-    fun insertViaSpring(@PathVariable count: Int): ResponseDto {
-        val time = measureTimeMillis {
-            service.saveBySpring(count)
-        }
-        return ResponseDto(
-            name = "Save by Spring",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
-
-    @PostMapping("/spring-save-all/{count}")
-    fun insertViaSaveAllSpring(@PathVariable count: Int): ResponseDto {
-        val time = measureTimeMillis {
-            service.saveAllBySpring(count)
-        }
-        return ResponseDto(
-            name = "Save all via Spring",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
-
-    @PostMapping("/spring-with-manual-persisting/{count}")
-    fun insertViaSpringWithManualPersisting(@PathVariable count: Int): ResponseDto {
-        val time = measureTimeMillis {
-            service.saveBySpringWithManualPersisting(count)
-        }
-        return ResponseDto(
-            name = "Save by Spring with manual batching",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
-
-    @PostMapping("/spring-with-copy/{count}")
-    fun insertViaSpringWithCopy(@PathVariable count: Int): ResponseDto {
-        val time = measureTimeMillis {
-            service.saveByCopyViaSpring(count)
-        }
-        return ResponseDto(
-            name = "Save by Spring with copy method",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
-
-    @PostMapping("/spring-with-copy-concurrent/{count}")
-    fun insertViaSpringWithCopyConcurrent(@PathVariable count: Int): ResponseDto {
-        val time = measureTimeMillis {
-            service.saveByCopyConcurrentViaSpring(count)
-        }
-        return ResponseDto(
-            name = "Save by Spring with copy concurrent method",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
-
-    @PostMapping("/spring-save-all-with-copy/{count}")
-    fun insertViaSpringSaveAllWithCopy(@PathVariable count: Int): ResponseDto {
-        val time = measureTimeMillis {
-            service.saveAllByCopyViaSpring(count)
-        }
-        return ResponseDto(
-            name = "Save by Spring with save all and copy method",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
-
-    @PostMapping("/spring-by-crud-repository/{count}")
-    fun insertViaSpringSaveByCrudRepository(@PathVariable count: Int): ResponseDto {
-        val time = measureTimeMillis {
-            service.saveByCrudRepositorySpring(count)
-        }
-        return ResponseDto(
-            name = "Save by crud repository Spring",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
-
-    @PostMapping("/spring-jdbc-template/{count}")
-    fun insertViaJdbcTemplate(@PathVariable count: Int): ResponseDto {
-        val time = measureTimeMillis {
-            service.saveByJdbcTemplateSpring(count)
-        }
-        return ResponseDto(
-            name = "Save by jdbc template",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
-
-    @PostMapping("/spring-named-jdbc-template/{count}")
-    fun insertViaNamedJdbcTemplate(@PathVariable count: Int): ResponseDto {
-        val time = measureTimeMillis {
-            service.saveByNamedJdbcTemplateSpring(count)
-        }
-        return ResponseDto(
-            name = "Save by named jdbc template",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
-
-    @PostMapping("/spring-update/{count}")
-    fun updateViaSpring(@PathVariable count: Int): ResponseDto {
-        val time = measureTimeMillis {
-            service.updateBySpring(count)
-        }
-        return ResponseDto(
-            name = "Update via spring",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
 
     private fun getTimeString(time: Long):String {
         val min = (time / 1000) / 60

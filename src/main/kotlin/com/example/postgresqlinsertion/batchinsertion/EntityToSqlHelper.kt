@@ -26,8 +26,8 @@ fun getDataFromEntityByField(entity: BaseEntity, field: Field) =
         null -> null
         is BaseEntity -> {
             field.annotations
-                ?.filterIsInstance(JoinColumn::class.java)
-                ?.firstOrNull()
+                .filterIsInstance<JoinColumn>()
+                .firstOrNull()
                 ?.referencedColumnName
                 ?.takeIf { it.isNotEmpty() }
                 ?.let { obj.javaClass.getDeclaredField(it) }
@@ -52,6 +52,9 @@ fun getColumnsStringByClass(clazz: KClass<out BaseEntity>) =
 
 fun getColumnsByClass(clazz: KClass<out BaseEntity>) =
     clazz.java.declaredFields.map { getColumnName(it) }
+
+fun getColumns(columns: Set<KProperty1<*, *>>) =
+    columns.map { getColumnName(it.javaField) }
 
 fun getColumnsString(columns: Set<KProperty1<*, *>>) =
     columns.joinToString(",") { getColumnName(it.javaField) }

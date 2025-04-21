@@ -168,7 +168,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
         val dataForInsert = mutableListOf<String>()
         val testData = getTestData()
 
-        getTestData().forEach {
+        testData.forEach {
             data[PaymentDocumentEntity::paymentPurpose] = it.first
             data[PaymentDocumentEntity::prop10] = it.second
             dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
@@ -182,7 +182,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
 
         val savedDoc =
             em.createNativeQuery("select id, payment_purpose, prop_15, prop_10, cur  from payment_document where order_date = '$orderDate' and cur = '$cur'").resultList as List<Array<Any>>
-        assertThat(savedDoc.size).isEqualTo(4)
+        assertThat(savedDoc.size).isEqualTo(testData.size)
         testData.forEachIndexed { index, pair ->
             assertThat(savedDoc[index][1]).isEqualTo(pair.first)
             assertThat(savedDoc[index][2]).isNull()
@@ -210,7 +210,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
 
         val updatedDoc =
             em.createNativeQuery("select id, payment_purpose, prop_15, prop_10, cur  from payment_document where order_date = '$orderDate' and cur = '$cur' order by prop_10").resultList as List<Array<Any>>
-        assertThat(updatedDoc.size).isEqualTo(4)
+        assertThat(updatedDoc.size).isEqualTo(testData.size)
         testData.forEachIndexed { index, pair ->
             assertThat(updatedDoc[index][1]).isEqualTo(paymentPurpose)
             assertThat(updatedDoc[index][2]).isEqualTo(prop15)
@@ -227,9 +227,10 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
             PaymentDocumentEntity::cur to cur,
             PaymentDocumentEntity::orderDate to "2022-01-01",
         )
+        val testData = getTestData()
         val dataForInsert = mutableListOf<String>()
 
-        getTestData().forEach {
+        testData.forEach {
             data[PaymentDocumentEntity::paymentPurpose] = it.first
             data[PaymentDocumentEntity::prop10] = it.second
             dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
@@ -243,8 +244,8 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
 
         val savedDoc =
             em.createNativeQuery("select payment_purpose, prop_15, prop_10, cur  from payment_document where order_date = '2022-01-01' and cur = '$cur'").resultList as List<Array<Any>>
-        assertThat(savedDoc.size).isEqualTo(4)
-        getTestData().forEachIndexed { index, pair ->
+        assertThat(savedDoc.size).isEqualTo(testData.size)
+        testData.forEachIndexed { index, pair ->
             assertThat(savedDoc[index][0]).isEqualTo(pair.first)
             assertThat(savedDoc[index][1]).isEqualTo("END")
             assertThat(savedDoc[index][2]).isEqualTo(pair.second)
@@ -299,6 +300,173 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
                 conn = conn
             )
         }.isInstanceOf(PSQLException::class.java)
+    }
+
+    @Test
+    fun `save several entity data via insert with prepared statement method`() {
+        val cur = em.createNativeQuery("select code from currency limit 1").singleResult.toString()
+        val dataForInsert = mutableListOf<List<Any?>>()
+        val testData = getTestData()
+        val prop15 = "NEW_PROP_PS"
+
+        val data = mutableMapOf<KMutableProperty1<out BaseEntity, *>, String?>()
+
+        testData.forEach {
+            data[PaymentDocumentEntity::prop15] = prop15
+            data[PaymentDocumentEntity::cur] = cur
+            data[PaymentDocumentEntity::paymentPurpose] = it.first
+            data[PaymentDocumentEntity::prop10] = it.second
+            dataForInsert.add(data.values.toList())
+        }
+        processor.insertDataToDataBasePreparedStatement(clazz = PaymentDocumentEntity::class, data.keys, data = dataForInsert, conn = conn)
+
+        val savedDoc =
+            em.createNativeQuery("select payment_purpose, prop_15, prop_10, cur  from payment_document where prop_15 = '$prop15' and cur = '$cur'").resultList as List<Array<Any>>
+        assertThat(savedDoc.size).isEqualTo(testData.size)
+        testData.forEachIndexed { index, pair ->
+            assertThat(savedDoc[index][0]).isEqualTo(pair.first)
+            assertThat(savedDoc[index][1]).isEqualTo(prop15)
+            assertThat(savedDoc[index][2]).isEqualTo(pair.second)
+            assertThat(savedDoc[index][3].toString()).isEqualTo(cur)
+        }
+    }
+
+    @Test
+    fun `save all entity data via insert with prepared statement method`() {
+        val dataForInsert = mutableListOf<List<Any?>>()
+        val prop10 = "7171_PR_PS"
+        val accountId = em.createNativeQuery("select id from account limit 1").singleResult.toString()
+        val data = mutableMapOf<KMutableProperty1<out BaseEntity, *>, Any?>()
+        data[PaymentDocumentEntity::account] = accountId.toLong()
+        data[PaymentDocumentEntity::expense] = false
+        data[PaymentDocumentEntity::amount] = BigDecimal("10.11")
+        data[PaymentDocumentEntity::cur] = "RUB"
+        data[PaymentDocumentEntity::orderDate] = LocalDate.parse("2023-01-01")
+        data[PaymentDocumentEntity::orderNumber] = "123"
+        data[PaymentDocumentEntity::prop20] = "1345"
+        data[PaymentDocumentEntity::prop15] = "END"
+        data[PaymentDocumentEntity::paymentPurpose] = null
+        data[PaymentDocumentEntity::prop10] = prop10
+        dataForInsert.add(data.values.toList())
+
+        processor.insertDataToDataBasePreparedStatement(clazz = PaymentDocumentEntity::class, columns = data.keys, data = dataForInsert, conn = conn)
+
+        val savedDoc = em.createNativeQuery(
+            """
+                select
+                    account_id,
+                    expense,
+                    cur,
+                    amount,
+                    order_date,
+                    order_number,
+                    prop_20,
+                    prop_15,
+                    payment_purpose,
+                    prop_10
+                from payment_document where prop_10 = '$prop10'
+            """.trimIndent()
+        ).resultList as List<Array<Any>>
+        assertThat(savedDoc.first()[0].toString()).isEqualTo(accountId)
+        assertThat(savedDoc.first()[1]).isEqualTo(false)
+        assertThat(savedDoc.first()[2]).isEqualTo("RUB")
+        assertThat(savedDoc.first()[3]).isEqualTo(BigDecimal("10.11"))
+        assertThat(savedDoc.first()[4]).isEqualTo(Date.valueOf("2023-01-01"))
+        assertThat(savedDoc.first()[5]).isEqualTo("123")
+        assertThat(savedDoc.first()[6]).isEqualTo("1345")
+        assertThat(savedDoc.first()[7]).isEqualTo("END")
+        assertThat(savedDoc.first()[8]).isNull()
+        assertThat(savedDoc.first()[9]).isEqualTo(prop10)
+    }
+
+    @Test
+    fun `save several entity data via insert with prepared statement and unnest method`() {
+        val cur = em.createNativeQuery("select code from currency limit 1").singleResult.toString()
+        val dataForInsert = mutableListOf<List<*>>()
+        val testData = getTestData()
+        val prop15 = "NEW_PR_PS_UNN"
+        val data = mutableMapOf<KMutableProperty1<out BaseEntity, *>, Any?>()
+
+        testData.forEach {
+            data[PaymentDocumentEntity::prop15] = prop15
+            data[PaymentDocumentEntity::cur] = cur
+            data[PaymentDocumentEntity::paymentPurpose] = it.first
+            data[PaymentDocumentEntity::prop10] = it.second
+            dataForInsert.add(data.values.toList())
+        }
+        val pgTypes = processor.getPgTypes(clazz = PaymentDocumentEntity::class, columns = data.keys, conn = conn)
+        processor.insertDataToDataBasePreparedStatementAndUnnest(
+            clazz = PaymentDocumentEntity::class,
+            columns = data.keys,
+            data = dataForInsert,
+            pgTypes = pgTypes,
+            conn = conn
+        )
+
+        val savedDoc =
+            em.createNativeQuery("select payment_purpose, prop_15, prop_10, cur  from payment_document where prop_15 = '$prop15' and cur = '$cur'").resultList as List<Array<Any>>
+        assertThat(savedDoc.size).isEqualTo(testData.size)
+        testData.forEachIndexed { index, pair ->
+            assertThat(savedDoc[index][0]).isEqualTo(pair.first)
+            assertThat(savedDoc[index][1]).isEqualTo(prop15)
+            assertThat(savedDoc[index][2]).isEqualTo(pair.second)
+            assertThat(savedDoc[index][3].toString()).isEqualTo(cur)
+        }
+    }
+
+    @Test
+    fun `save all entity data via insert with prepared statement and unnest method`() {
+        val dataForInsert = mutableListOf<List<Any?>>()
+        val prop10 = "7_PR_PS_UN"
+        val accountId = em.createNativeQuery("select id from account limit 1").singleResult.toString()
+        val data = mutableMapOf<KMutableProperty1<out BaseEntity, *>, Any?>()
+        data[PaymentDocumentEntity::account] = accountId.toLong()
+        data[PaymentDocumentEntity::expense] = false
+        data[PaymentDocumentEntity::amount] = BigDecimal("10.11")
+        data[PaymentDocumentEntity::cur] = "RUB"
+        data[PaymentDocumentEntity::orderDate] = LocalDate.parse("2023-01-01")
+        data[PaymentDocumentEntity::orderNumber] = "123"
+        data[PaymentDocumentEntity::prop20] = "1345"
+        data[PaymentDocumentEntity::prop15] = "END"
+        data[PaymentDocumentEntity::paymentPurpose] = null
+        data[PaymentDocumentEntity::prop10] = prop10
+        dataForInsert.add(data.values.toList())
+        val pgTypes = processor.getPgTypes(clazz = PaymentDocumentEntity::class, columns = data.keys, conn = conn)
+
+        processor.insertDataToDataBasePreparedStatementAndUnnest(
+            clazz = PaymentDocumentEntity::class,
+            columns = data.keys,
+            data = dataForInsert,
+            pgTypes = pgTypes,
+            conn = conn
+        )
+
+        val savedDoc = em.createNativeQuery(
+            """
+                select
+                    account_id,
+                    expense,
+                    cur,
+                    amount,
+                    order_date,
+                    order_number,
+                    prop_20,
+                    prop_15,
+                    payment_purpose,
+                    prop_10
+                from payment_document where prop_10 = '$prop10'
+            """.trimIndent()
+        ).resultList as List<Array<Any>>
+        assertThat(savedDoc.first()[0].toString()).isEqualTo(accountId)
+        assertThat(savedDoc.first()[1]).isEqualTo(false)
+        assertThat(savedDoc.first()[2]).isEqualTo("RUB")
+        assertThat(savedDoc.first()[3]).isEqualTo(BigDecimal("10.11"))
+        assertThat(savedDoc.first()[4]).isEqualTo(Date.valueOf("2023-01-01"))
+        assertThat(savedDoc.first()[5]).isEqualTo("123")
+        assertThat(savedDoc.first()[6]).isEqualTo("1345")
+        assertThat(savedDoc.first()[7]).isEqualTo("END")
+        assertThat(savedDoc.first()[8]).isNull()
+        assertThat(savedDoc.first()[9]).isEqualTo(prop10)
     }
 
     @Test
@@ -425,8 +593,9 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
             PaymentDocumentEntity::prop15 to "END",
             PaymentDocumentEntity::prop20 to "7777877",
         )
+        val testData = getTestData()
 
-        getTestData().forEach {
+        testData.forEach {
             data[PaymentDocumentEntity::paymentPurpose] = it.first
             data[PaymentDocumentEntity::prop10] = it.second
             processor.addDataForCreate(data = data, writer = writer, delimiter = delimiter, nullValue = nullValue)
@@ -443,8 +612,8 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
 
         val savedDoc =
             em.createNativeQuery("select payment_purpose, prop_15, prop_10, prop_20  from payment_document where prop_20 = '$prop20'").resultList as List<Array<Any>>
-        assertThat(savedDoc.size).isEqualTo(4)
-        getTestData().forEachIndexed { index, pair ->
+        assertThat(savedDoc.size).isEqualTo(testData.size)
+        testData.forEachIndexed { index, pair ->
             assertThat(savedDoc[index][0]).isEqualTo(pair.first)
             assertThat(savedDoc[index][1]).isEqualTo("END")
             assertThat(savedDoc[index][2]).isEqualTo(pair.second)
@@ -627,13 +796,14 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
         val file = File(this::class.java.getResource("").file, "/PD_Test")
         val writer = DataOutputStream(file.outputStream())
         val prop20 = "7777877_b"
+        val testData = getTestData()
         val data = mutableMapOf<KMutableProperty1<out BaseEntity, *>, Any?>(
             PaymentDocumentEntity::prop15 to "END",
             PaymentDocumentEntity::prop20 to prop20,
         )
 
         processor.startSaveBinaryDataForCopyMethod(writer)
-        getTestData().forEach {
+        testData.forEach {
             data[PaymentDocumentEntity::paymentPurpose] = it.first
             data[PaymentDocumentEntity::prop10] = it.second
             processor.addDataForCreateWithBinary(data = data, outputStream = writer)
@@ -648,8 +818,8 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
 
         val savedDoc =
             em.createNativeQuery("select payment_purpose, prop_15, prop_10, prop_20  from payment_document where prop_20 = '$prop20'").resultList as List<Array<Any>>
-        assertThat(savedDoc.size).isEqualTo(4)
-        getTestData().forEachIndexed { index, pair ->
+        assertThat(savedDoc.size).isEqualTo(testData.size)
+        testData.forEachIndexed { index, pair ->
             assertThat(savedDoc[index][0]).isEqualTo(pair.first)
             assertThat(savedDoc[index][1]).isEqualTo("END")
             assertThat(savedDoc[index][2]).isEqualTo(pair.second)
@@ -693,7 +863,11 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
                 Pair("бла бла", "222"),
                 Pair("бла бла | бла блабла", "333"),
                 Pair("б`л~а !б@л#а№;ж\$s%u ^s p &l? z* (d)- _s+= /W\\|{we}[ct]a,r<cs.>w's", "444"),
-                Pair("бла\b бла \n бла \r бла \tбла бла", "555")
+                Pair("бла\b бла \n бла \r бла \tбла бла", "555"),
+                Pair("select id from account limit 1", "666"),
+                Pair("'select id from account limit 1'", "777"),
+                Pair("'select id from account limit 1", "888"),
+                Pair("--select id from account limit 1", "999"),
             )
         }
 

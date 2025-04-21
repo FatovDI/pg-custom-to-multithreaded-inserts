@@ -1,6 +1,7 @@
 package com.example.postgresqlinsertion.batchinsertion.impl.repository
 
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByEntityProcessor
+import com.example.postgresqlinsertion.batchinsertion.api.saver.BatchInsertionByEntitySaver
 import com.example.postgresqlinsertion.batchinsertion.impl.saver.CopyByEntityConcurrentSaver
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import java.util.concurrent.ExecutorService
@@ -14,13 +15,13 @@ class ConcurrentSaverHandler<E : BaseEntity>(
     private val batchSize: Int,
     private val numberOfSavers: Int = 4,
     executorService: ExecutorService
-) {
+): BatchInsertionByEntitySaver<E> {
     private var counterEntity = 0
     private var counterSaver = 0
     private val savers = (1..numberOfSavers)
         .map { CopyByEntityConcurrentSaver(processor, entityClass, dataSource.connection, batchSize, executorService) }
 
-    fun addDataForSave(entity: E) {
+    override fun addDataForSave(entity: E) {
 
         val currSaver = savers[counterSaver % numberOfSavers]
 
@@ -30,16 +31,28 @@ class ConcurrentSaverHandler<E : BaseEntity>(
         counterEntity.takeIf { it % batchSize == 0 }?.let { counterSaver++ }
     }
 
-    fun commit() {
+    override fun saveData() {
+        savers.forEach {
+            it.saveData()
+        }
+    }
+
+    override fun commit() {
         savers.forEach {
             it.commit()
             it.close()
         }
     }
 
-    fun rollback() {
+    override fun rollback() {
         savers.forEach {
             it.rollback()
+            it.close()
+        }
+    }
+
+    override fun close() {
+        savers.forEach {
             it.close()
         }
     }
