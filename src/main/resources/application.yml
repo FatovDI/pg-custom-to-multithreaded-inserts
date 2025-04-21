@@ -31,6 +31,7 @@ spring:
     url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}?stringtype=unspecified
     hikari:
       schema: "test_insertion"
+      maximum-pool-size: 20
       data-source-properties:
         reWriteBatchedInserts: true
 #      dataSourceClassName: com.zaxxer.hikari.HikariDataSource
