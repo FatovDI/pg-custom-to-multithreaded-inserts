@@ -17,5 +17,5 @@ interface BatchInsertionByPropertySaver<E: BaseEntity>: BatchInsertionSaver {
     /**
      * send data to DB
      */
-    fun saveData(columns: Set<KProperty1<E, *>>,)
+    fun saveData()
 }

@@ -1,7 +1,6 @@
 package com.example.postgresqlinsertion.batchinsertion.impl.saver
 
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByPropertyProcessor
-import com.example.postgresqlinsertion.batchinsertion.api.saver.BatchInsertionByPropertySaver
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import java.io.File
 import java.io.FileReader
@@ -15,7 +14,8 @@ open class CopyViaFileByPropertySaver<E : BaseEntity>(
     private val processor: BatchInsertionByPropertyProcessor,
     private val entityClass: KClass<E>,
     conn: Connection,
-) : AbstractBatchInsertionSaver(conn), BatchInsertionByPropertySaver<E> {
+    batchSize: Int
+) : AbstractBatchInsertionByPropertySaver<E>(conn, batchSize) {
 
     private val delimiter = "|"
     private val nullValue = "NULL"
@@ -24,13 +24,15 @@ open class CopyViaFileByPropertySaver<E : BaseEntity>(
 
     override fun addDataForSave(data: Map<out KProperty1<E, *>, Any?>) {
         processor.addDataForCreate(data, writer, delimiter, nullValue)
+        super.addDataForSave(data)
     }
 
-    override fun saveData(columns: Set<KProperty1<E, *>>) {
+    override fun saveData() {
+        super.saveData()
         writer.close()
         processor.saveToDataBaseByCopyMethod(
             clazz = entityClass,
-            columns = columns,
+            columns = columns!!,
             delimiter = delimiter,
             nullValue = nullValue,
             from = FileReader(file),

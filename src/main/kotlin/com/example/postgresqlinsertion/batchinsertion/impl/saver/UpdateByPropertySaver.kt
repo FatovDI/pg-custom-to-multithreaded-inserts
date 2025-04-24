@@ -1,7 +1,6 @@
 package com.example.postgresqlinsertion.batchinsertion.impl.saver
 
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByPropertyProcessor
-import com.example.postgresqlinsertion.batchinsertion.api.saver.BatchInsertionByPropertySaver
 import com.example.postgresqlinsertion.batchinsertion.exception.BatchInsertionException
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import java.sql.Connection
@@ -13,7 +12,8 @@ open class UpdateByPropertySaver<E: BaseEntity>(
     private val processor: BatchInsertionByPropertyProcessor,
     private val entityClass: KClass<E>,
     conn: Connection,
-) : AbstractBatchInsertionSaver(conn), BatchInsertionByPropertySaver<E> {
+    batchSize: Int
+) : AbstractBatchInsertionByPropertySaver<E>(conn, batchSize) {
 
     private val nullValue = "NULL"
     private val dataForUpdate = mutableListOf<String>()
@@ -25,10 +25,12 @@ open class UpdateByPropertySaver<E: BaseEntity>(
             ?: throw BatchInsertionException("Id should be not null for update")
 
         dataForUpdate.add(processor.getStringForUpdate(data, id, nullValue))
+        super.addDataForSave(data)
     }
 
-    override fun saveData(columns: Set<KProperty1<E, *>>) {
-        processor.updateDataToDataBase(entityClass, columns, dataForUpdate, conn)
+    override fun saveData() {
+        super.saveData()
+        processor.updateDataToDataBase(entityClass, columns!!, dataForUpdate, conn)
         dataForUpdate.clear()
     }
 }

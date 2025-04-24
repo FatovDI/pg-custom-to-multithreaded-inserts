@@ -1,7 +1,6 @@
 package com.example.postgresqlinsertion.batchinsertion.impl.saver
 
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByPropertyProcessor
-import com.example.postgresqlinsertion.batchinsertion.api.saver.BatchInsertionByPropertySaver
 import com.example.postgresqlinsertion.batchinsertion.exception.BatchInsertionException
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import java.sql.Connection
@@ -13,7 +12,8 @@ open class UpdateByPropertyPreparedStatementSaver<E: BaseEntity>(
     private val processor: BatchInsertionByPropertyProcessor,
     private val entityClass: KClass<E>,
     conn: Connection,
-) : AbstractBatchInsertionSaver(conn), BatchInsertionByPropertySaver<E> {
+    batchSize: Int
+) : AbstractBatchInsertionByPropertySaver<E>(conn, batchSize) {
 
     private val conditions = listOf("id")
     private val dataForUpdate = mutableListOf<Collection<Any?>>()
@@ -25,10 +25,12 @@ open class UpdateByPropertyPreparedStatementSaver<E: BaseEntity>(
             ?: throw BatchInsertionException("Id should be not null for update")
 
         dataForUpdate.add(data.values + id)
+        super.addDataForSave(data)
     }
 
-    override fun saveData(columns: Set<KProperty1<E, *>>) {
-        processor.updateDataToDataBasePreparedStatement(entityClass, columns, dataForUpdate, conditions, conn)
+    override fun saveData() {
+        super.saveData()
+        processor.updateDataToDataBasePreparedStatement(entityClass, columns!!, dataForUpdate, conditions, conn)
         dataForUpdate.clear()
     }
 }

@@ -1,7 +1,6 @@
 package com.example.postgresqlinsertion.batchinsertion.impl.saver
 
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByPropertyProcessor
-import com.example.postgresqlinsertion.batchinsertion.api.saver.BatchInsertionByPropertySaver
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import java.io.BufferedOutputStream
 import java.io.DataOutputStream
@@ -16,7 +15,8 @@ open class CopyBinaryViaFileByPropertySaver<E : BaseEntity>(
     private val processor: BatchInsertionByPropertyProcessor,
     private val entityClass: KClass<E>,
     conn: Connection,
-) : AbstractBatchInsertionSaver(conn), BatchInsertionByPropertySaver<E> {
+    batchSize: Int
+) : AbstractBatchInsertionByPropertySaver<E>(conn, batchSize) {
 
     private var file = File(Paths.get("./${UUID.randomUUID()}").toUri())
     private var writer = DataOutputStream(BufferedOutputStream(file.outputStream()))
@@ -27,13 +27,15 @@ open class CopyBinaryViaFileByPropertySaver<E : BaseEntity>(
 
     override fun addDataForSave(data: Map<out KProperty1<E, *>, Any?>) {
         processor.addDataForCreateWithBinary(data, writer)
+        super.addDataForSave(data)
     }
 
-    override fun saveData(columns: Set<KProperty1<E, *>>) {
+    override fun saveData() {
+        super.saveData()
         processor.endSaveBinaryDataForCopyMethod(writer)
         processor.saveBinaryToDataBaseByCopyMethod(
             clazz = entityClass,
-            columns = columns,
+            columns = columns!!,
             from = file.inputStream(),
             conn = conn
         )

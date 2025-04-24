@@ -13,9 +13,6 @@ import com.example.postgresqlinsertion.logic.entity.PaymentDocumentEntity
 import com.example.postgresqlinsertion.logic.repository.AccountRepository
 import com.example.postgresqlinsertion.logic.repository.CurrencyRepository
 import com.example.postgresqlinsertion.logic.repository.PaymentDocumentCustomRepository
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -26,8 +23,6 @@ import kotlin.reflect.KMutableProperty1
 
 @Service
 class PaymentDocumentService(
-    @Value("\${batch_insertion.batch_size}")
-    private val batchSize: Int,
     private val accountRepo: AccountRepository,
     private val currencyRepo: CurrencyRepository,
     private val sqlHelper: SqlHelper,
@@ -90,13 +85,7 @@ class PaymentDocumentService(
             for (i in 0 until count) {
                 fillRandomDataByKProperty(null, currencies.random(), accounts.random(), data)
                 saver.addDataForSave(data)
-                if (i != 0 && i % batchSize == 0) {
-                    log.info("save batch insertion $batchSize by copy method by property ")
-                    saver.saveData(data.keys)
-                }
             }
-            saver.saveData(data.keys)
-            log.info("start commit data by copy method by property $count to DB")
             saver.commit()
         }
 
@@ -114,13 +103,7 @@ class PaymentDocumentService(
             for (i in 0 until count) {
                 fillRandomDataByKProperty(null, currencies.random(), accounts.random(), data)
                 saver.addDataForSave(data)
-                if (i != 0 && i % batchSize == 0) {
-                    log.info("save batch insertion $batchSize by copy with binary data method by property")
-                    saver.saveData(data.keys)
-                }
             }
-            saver.saveData(data.keys)
-            log.info("start commit binary data by copy method by property $count to DB")
             saver.commit()
         }
 
@@ -165,10 +148,6 @@ class PaymentDocumentService(
                 fillRandomDataByKProperty(null, currencies.random(), accounts.random(), data)
                 saver.addDataForSave(data)
             }
-
-            log.info("start save file by property $count to DB")
-
-            saver.saveData(data.keys)
             saver.commit()
         }
 
@@ -188,10 +167,6 @@ class PaymentDocumentService(
                 fillRandomDataByKProperty(null, currencies.random(), accounts.random(), data)
                 saver.addDataForSave(data)
             }
-
-            log.info("start save binary file by property $count to DB")
-
-            saver.saveData(data.keys)
             saver.commit()
         }
 
@@ -277,13 +252,7 @@ class PaymentDocumentService(
             for (i in 0 until count) {
                 fillRandomDataByKProperty(null, currencies.random(), accounts.random(), data)
                 saver.addDataForSave(data)
-                if (i != 0 && i % batchSize == 0) {
-                    log.info("save batch insertion $batchSize by property")
-                    saver.saveData(data.keys)
-                }
             }
-            saver.saveData(data.keys)
-            log.info("start commit insert collection $count by property")
             saver.commit()
         }
 
@@ -303,13 +272,7 @@ class PaymentDocumentService(
             for (i in 0 until count) {
                 fillRandomDataByKProperty(listId[i], currencies.random(), accounts.random(), data)
                 saver.addDataForSave(data)
-                if (i != 0 && i % batchSize == 0) {
-                    log.info("save batch update $batchSize by property")
-                    saver.saveData(data.keys)
-                }
             }
-            saver.saveData(data.keys)
-            log.info("start commit update collection $count by property")
             saver.commit()
         }
 
@@ -329,13 +292,7 @@ class PaymentDocumentService(
             for (i in 0 until count) {
                 fillRandomDataByKProperty(listId[i], currencies.random(), accounts.random(), data)
                 saver.addDataForSave(data)
-                if (i != 0 && i % batchSize == 0) {
-                    log.info("save batch update $batchSize by property prepared statemen")
-                    saver.saveData(data.keys)
-                }
             }
-            saver.saveData(data.keys)
-            log.info("start commit update collection $count by property prepared statemen")
             saver.commit()
         }
 
@@ -354,13 +311,7 @@ class PaymentDocumentService(
                 data[PaymentDocumentEntity::id] = listId[i].toString()
                 data[PaymentDocumentEntity::prop10] = getRandomString(10)
                 saver.addDataForSave(data)
-                if (i != 0 && i % batchSize == 0) {
-                    log.info("save batch update only one field $batchSize by property")
-                    saver.saveData(data.keys)
-                }
             }
-            saver.saveData(data.keys)
-            log.info("start commit update only one field collection $count by property")
             saver.commit()
         }
 
@@ -379,13 +330,7 @@ class PaymentDocumentService(
                 data[PaymentDocumentEntity::id] = listId[i].toString()
                 data[PaymentDocumentEntity::prop10] = getRandomString(10)
                 saver.addDataForSave(data)
-                if (i != 0 && i % batchSize == 0) {
-                    log.info("save batch update only one field $batchSize by property prepared statement")
-                    saver.saveData(data.keys)
-                }
             }
-            saver.saveData(data.keys)
-            log.info("start commit update only one field collection $count by property prepared statement")
             saver.commit()
         }
 

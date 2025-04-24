@@ -40,14 +40,12 @@ class ConcurrentSaverHandler<E : BaseEntity>(
     override fun commit() {
         savers.forEach {
             it.commit()
-            it.close()
         }
     }
 
     override fun rollback() {
         savers.forEach {
             it.rollback()
-            it.close()
         }
     }
 

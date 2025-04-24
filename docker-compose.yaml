@@ -16,7 +16,7 @@ services:
 
   db:
 #    image: postgres:latest
-    image: db_joker:1
+    image: prep_db:1
     ports:
       - "5437:5432"
     environment:

@@ -46,7 +46,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
             )
 
             saver.addDataForSave(data)
-            saver.saveData(data.keys)
             saver.commit()
         }
 
@@ -71,7 +70,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
 
             saver.addDataForSave(data)
             saver.addDataForSave(data)
-            saver.saveData(data.keys)
             saver.commit()
         }
 
@@ -96,7 +94,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
             )
 
             saver.addDataForSave(data)
-            saver.saveData(data.keys)
             saver.commit()
         }
 
@@ -121,7 +118,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
 
             saver.addDataForSave(data)
             saver.addDataForSave(data)
-            saver.saveData(data.keys)
             saver.commit()
         }
 
@@ -146,7 +142,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
             )
 
             saver.addDataForSave(data)
-            saver.saveData(data.keys)
             saver.commit()
         }
 
@@ -171,7 +166,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
 
             saver.addDataForSave(data)
             saver.addDataForSave(data)
-            saver.saveData(data.keys)
             saver.commit()
         }
 
@@ -196,7 +190,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
             )
 
             saver.addDataForSave(data)
-            saver.saveData(data.keys)
             saver.commit()
         }
 
@@ -221,7 +214,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
 
             saver.addDataForSave(data)
             saver.addDataForSave(data)
-            saver.saveData(data.keys)
             saver.commit()
         }
 
@@ -246,7 +238,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
             )
 
             saver.addDataForSave(insertData)
-            saver.saveData(insertData.keys)
             saver.commit()
         }
         val savedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
@@ -261,7 +252,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
 
         batchInsertionFactory.getSaver(SaverType.UPDATE).use { saver ->
             saver.addDataForSave(updateData)
-            saver.saveData(updateData.keys)
             saver.commit()
         }
 
@@ -286,7 +276,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
 
             saver.addDataForSave(insertData)
             saver.addDataForSave(insertData)
-            saver.saveData(insertData.keys)
             saver.commit()
         }
         val savedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
@@ -302,7 +291,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         batchInsertionFactory.getSaver(SaverType.UPDATE).use { saver ->
             saver.addDataForSave(updateData)
             saver.addDataForSave(updateData.apply { put(PaymentDocumentEntity::id, savedPd[1].id) })
-            saver.saveData(updateData.keys)
             saver.commit()
         }
 
@@ -327,7 +315,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
             )
 
             saver.addDataForSave(insertData)
-            saver.saveData(insertData.keys)
             saver.commit()
         }
         val savedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
@@ -342,7 +329,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
 
         batchInsertionFactory.getSaver(SaverType.UPDATE_PREPARED_STATEMENT).use { saver ->
             saver.addDataForSave(updateData)
-            saver.saveData(updateData.keys)
             saver.commit()
         }
 
@@ -367,7 +353,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
 
             saver.addDataForSave(insertData)
             saver.addDataForSave(insertData)
-            saver.saveData(insertData.keys)
             saver.commit()
         }
         val savedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
@@ -383,7 +368,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         batchInsertionFactory.getSaver(SaverType.UPDATE_PREPARED_STATEMENT).use { saver ->
             saver.addDataForSave(updateData)
             saver.addDataForSave(updateData.apply { put(PaymentDocumentEntity::id, savedPd[1].id) })
-            saver.saveData(updateData.keys)
             saver.commit()
         }
 
@@ -409,7 +393,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
             )
 
             saver.addDataForSave(data)
-            saver.saveData(data.keys)
             saver.commit()
 
         }
@@ -435,7 +418,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
 
             saver.addDataForSave(data)
             saver.addDataForSave(data)
-            saver.saveData(data.keys)
             saver.commit()
         }
 
@@ -462,7 +444,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
             )
 
             saver.addDataForSave(data)
-            saver.saveData(data.keys)
             saver.commit()
 
         }
@@ -488,7 +469,6 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
 
             saver.addDataForSave(data)
             saver.addDataForSave(data)
-            saver.saveData(data.keys)
             saver.commit()
         }
 
