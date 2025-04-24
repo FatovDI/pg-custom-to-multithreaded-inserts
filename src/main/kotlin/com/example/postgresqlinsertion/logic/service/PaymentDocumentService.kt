@@ -13,9 +13,13 @@ import com.example.postgresqlinsertion.logic.entity.PaymentDocumentEntity
 import com.example.postgresqlinsertion.logic.repository.AccountRepository
 import com.example.postgresqlinsertion.logic.repository.CurrencyRepository
 import com.example.postgresqlinsertion.logic.repository.PaymentDocumentCustomRepository
+import com.fasterxml.uuid.Generators
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.*
 import javax.sql.DataSource
 import kotlin.random.Random
 import kotlin.reflect.KMutableProperty1
@@ -23,6 +27,8 @@ import kotlin.reflect.KMutableProperty1
 
 @Service
 class PaymentDocumentService(
+    @Value("\${batch_insertion.batch_size}")
+    private val batchSize: Int,
     private val accountRepo: AccountRepository,
     private val currencyRepo: CurrencyRepository,
     private val sqlHelper: SqlHelper,
@@ -31,6 +37,7 @@ class PaymentDocumentService(
     private val pdCustomRepository: PaymentDocumentCustomRepository,
     private val byPropertyProcessor: BatchInsertionByPropertyProcessor,
     private val dataSource: DataSource,
+    val jdbcTemplate: JdbcTemplate = JdbcTemplate(dataSource),
 ) {
 
     private val log by logger()
@@ -58,6 +65,25 @@ class PaymentDocumentService(
             }
             saver.commit()
         }
+
+    }
+
+    fun saveByCopyConcurrentAndAtomic(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+        val transactionId = Generators.timeBasedEpochGenerator().generate()
+
+        pdBatchByEntitySaverFactory.getSaver(SaverType.COPY_CONCURRENT).use { saver ->
+            for (i in 0 until count) {
+                saver.addDataForSave(
+                    getRandomEntity(null, currencies.random(), accounts.random(), transactionId)
+                        .apply { readyToRead = false }
+                )
+            }
+            saver.commit()
+        }
+
+        setReadyToRead(transactionId)
 
     }
 
@@ -232,7 +258,7 @@ class PaymentDocumentService(
 
         pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
             for (i in 0 until count) {
-                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber))
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(),null, orderNumber))
             }
             saver.commit()
         }
@@ -245,7 +271,7 @@ class PaymentDocumentService(
 
         pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT_UNNEST).use { saver ->
             for (i in 0 until count) {
-                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber))
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), null, orderNumber))
             }
             saver.commit()
         }
@@ -421,6 +447,28 @@ class PaymentDocumentService(
 
     }
 
+    fun setReadyToReadArray(idList: List<Long>): Int {
+        return jdbcTemplate.update(
+            "update payment_document set ready_to_read = true where id = any (?)"
+        ) {  ps ->
+            ps.setObject(1, idList.toTypedArray())
+        }
+    }
+
+    fun setReadyToRead(idList: List<Long>): Array<IntArray> {
+        return jdbcTemplate.batchUpdate(
+            "update payment_document set ready_to_read = true where id = ?",
+            idList, batchSize) {  ps, argument ->
+            ps.setLong(1, argument)
+        }
+    }
+
+    fun setReadyToRead(transactionId: UUID): Int {
+        return jdbcTemplate.update(
+            "update payment_document set ready_to_read = true  where transaction_id = ?") {  ps ->
+            ps.setObject(1, transactionId)
+        }
+    }
 
     fun findAllByOrderNumberAndOrderDate(orderNumber: String, orderDate: LocalDate): List<PaymentDocumentEntity> {
         return pdCustomRepository.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
@@ -430,6 +478,7 @@ class PaymentDocumentService(
         id: Long?,
         cur: CurrencyEntity,
         account: AccountEntity,
+        transactionId: UUID? = null,
         orderNumber: String? = null
     ): PaymentDocumentEntity {
         return PaymentDocumentEntity(
@@ -443,7 +492,10 @@ class PaymentDocumentService(
             prop10 = getRandomString(10),
             prop15 = getRandomString(15),
             prop20 = getRandomString(20),
-        ).apply { this.id = id }
+        )
+            .apply { this.id = id }
+            .apply { this.transactionId = transactionId }
+            .apply { this.readyToRead = transactionId?.let { false }?: true }
     }
 
     private fun fillRandomDataByKProperty(
