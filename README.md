@@ -13,7 +13,7 @@ This application is designed to test various methods for inserting data into a P
 
 ## **Working with the Preloaded Database**
 
-1. **Download the Image:** Grab the PostgreSQL image with preloaded data [here](https://disk.yandex.ru/d/HSDey0d-og_J5w) named `prep_db.tar.gz`.
+1. **Download the Image:** Grab the PostgreSQL image with preloaded data [here](https://disk.yandex.ru/d/gSJozEqP5-QTbQ) named `prep_db.tar.gz`.
 2. **Load Image:** Import the image to your local Docker registry using:
    ```bash
    sudo docker load < prep_db.tar.gz
