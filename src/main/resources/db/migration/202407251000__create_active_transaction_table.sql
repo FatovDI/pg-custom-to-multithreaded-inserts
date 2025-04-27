@@ -1,0 +1,8 @@
+ALTER TABLE PAYMENT_DOCUMENT ADD COLUMN transaction_id uuid DEFAULT null;
+
+CREATE TABLE ACTIVE_TRANSACTION
+(
+    transaction_id uuid NOT NULL
+);
+
+CREATE INDEX IX_ACTIVE_TRANSACTION_transaction_id on ACTIVE_TRANSACTION (transaction_id);
