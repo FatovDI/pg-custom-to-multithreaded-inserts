@@ -13,6 +13,8 @@ import com.example.postgresqlinsertion.logic.entity.PaymentDocumentEntity
 import com.example.postgresqlinsertion.logic.repository.AccountRepository
 import com.example.postgresqlinsertion.logic.repository.CurrencyRepository
 import com.example.postgresqlinsertion.logic.repository.PaymentDocumentCustomRepository
+import com.fasterxml.uuid.Generators
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -31,6 +33,7 @@ class PaymentDocumentService(
     private val pdCustomRepository: PaymentDocumentCustomRepository,
     private val byPropertyProcessor: BatchInsertionByPropertyProcessor,
     private val dataSource: DataSource,
+    val jdbcTemplate: JdbcTemplate = JdbcTemplate(dataSource),
 ) {
 
     private val log by logger()
@@ -59,6 +62,21 @@ class PaymentDocumentService(
             saver.commit()
         }
 
+    }
+
+    fun saveByCopyConcurrentAndAtomic(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+        val transactionId = Generators.timeBasedEpochGenerator().generate()
+
+        jdbcTemplate.update("INSERT INTO active_transaction (transaction_id) VALUES (?)", transactionId)
+        pdBatchByEntitySaverFactory.getSaver(SaverType.COPY_CONCURRENT).use { saver ->
+            for (i in 0 until count) {
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
+            }
+            saver.commit()
+        }
+        jdbcTemplate.update("DELETE FROM active_transaction WHERE transaction_id =?", transactionId)
     }
 
     fun saveByCopy(count: Int) {
