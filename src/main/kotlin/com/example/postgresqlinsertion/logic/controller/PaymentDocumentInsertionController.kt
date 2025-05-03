@@ -132,6 +132,18 @@ class PaymentDocumentInsertionController(
         )
     }
 
+    @PostMapping("/insert-basic/{count}")
+    fun insertViaInsertBasic(@PathVariable count: Int): ResponseDto {
+        val time = measureTimeMillis {
+            service.saveByInsertBasic(count)
+        }
+        return ResponseDto(
+            name = "Insert method basic",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
     @PostMapping("/insert-prepared-statement/{count}")
     fun insertViaInsertWithPreparedStatement(
         @PathVariable count: Int,

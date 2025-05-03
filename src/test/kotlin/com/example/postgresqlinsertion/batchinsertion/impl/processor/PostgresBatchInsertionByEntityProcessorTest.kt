@@ -94,6 +94,28 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
 
     @ParameterizedTest
     @MethodSource("getTestData")
+    fun `insert data via entity with basic method`(params: Pair<String, String>) {
+        val paymentPurpose = params.first
+        val prop10 = params.second + "8_b"
+        val accountId = em.createNativeQuery("select id from account limit 1").singleResult.toString()
+        val data = PaymentDocumentEntity(
+            account = AccountEntity().apply { id = accountId.toLong() },
+            prop15 = "END",
+            paymentPurpose = paymentPurpose,
+            prop10 = prop10,
+        )
+        val dataForInsert = mutableListOf<String>()
+        dataForInsert.add(processor.getStringForInsert(data))
+        processor.insertDataToDataBaseBasic(clazz = PaymentDocumentEntity::class, data = dataForInsert, conn = conn)
+        val savedDoc =
+            em.createNativeQuery("select account_id, prop_15, payment_purpose  from payment_document where prop_10 = '$prop10'").resultList as List<Array<Any>>
+        assertThat(savedDoc.first()[0].toString()).isEqualTo(accountId)
+        assertThat(savedDoc.first()[1]).isEqualTo("END")
+        assertThat(savedDoc.first()[2]).isEqualTo(params.first)
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestData")
     fun `update saved data via entity prepared statement`(params: Pair<String, String>) {
         val paymentPurpose = params.first
         val prop10 = params.second + "8_ps"

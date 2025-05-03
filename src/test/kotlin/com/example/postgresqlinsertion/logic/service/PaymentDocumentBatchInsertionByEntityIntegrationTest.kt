@@ -112,6 +112,63 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
     }
 
     @Test
+    fun `save entity via basic insert method`() {
+        val orderNumber = "333_b"
+        val orderDate = LocalDate.now()
+        val paymentPurpose = "save entity via insert method"
+
+        batchInsertionFactory.getSaver(SaverType.INSERT_BASIC).use { saver ->
+
+            saver.addDataForSave(
+                PaymentDocumentEntity(
+                    paymentPurpose = paymentPurpose,
+                    orderNumber = orderNumber,
+                    orderDate = orderDate,
+                    prop15 = "END"
+                )
+            )
+            saver.commit()
+        }
+
+        val savedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
+        assertThat(savedPd.size).isGreaterThan(0)
+        assertThat(savedPd.first().paymentPurpose).isEqualTo(paymentPurpose)
+    }
+
+    @Test
+    fun `save several entity via basic insert method`() {
+        val orderNumber = "444_b"
+        val orderDate = LocalDate.now()
+        val paymentPurpose = "save several entity via insert method"
+
+        batchInsertionFactory.getSaver(SaverType.INSERT_BASIC).use { saver ->
+
+            saver.addDataForSave(
+                PaymentDocumentEntity(
+                    paymentPurpose = paymentPurpose,
+                    orderNumber = orderNumber,
+                    orderDate = orderDate,
+                    prop15 = "END"
+                )
+            )
+            saver.addDataForSave(
+                PaymentDocumentEntity(
+                    paymentPurpose = paymentPurpose,
+                    orderNumber = orderNumber,
+                    orderDate = orderDate,
+                    prop15 = "END"
+                )
+            )
+            saver.commit()
+        }
+
+        val savedPd = service.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
+        assertThat(savedPd.size).isEqualTo(2)
+        assertThat(savedPd[0].paymentPurpose).isEqualTo(paymentPurpose)
+        assertThat(savedPd[1].paymentPurpose).isEqualTo(paymentPurpose)
+    }
+
+    @Test
     fun `save several entity via insert method`() {
         val orderNumber = "444"
         val orderDate = LocalDate.now()

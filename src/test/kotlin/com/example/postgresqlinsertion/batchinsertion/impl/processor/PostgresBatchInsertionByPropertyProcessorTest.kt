@@ -302,6 +302,90 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
         }.isInstanceOf(PSQLException::class.java)
     }
 
+
+    @Test
+    fun `save several data via basic insert method`() {
+        val cur = em.createNativeQuery("select code from currency limit 1").singleResult.toString()
+        val data = mutableMapOf<KMutableProperty1<out BaseEntity, *>, String?>(
+            PaymentDocumentEntity::prop15 to "END",
+            PaymentDocumentEntity::cur to cur,
+            PaymentDocumentEntity::orderDate to "2022-01-03",
+        )
+        val testData = getTestData()
+        val dataForInsert = mutableListOf<String>()
+
+        testData.forEach {
+            data[PaymentDocumentEntity::paymentPurpose] = it.first
+            data[PaymentDocumentEntity::prop10] = it.second
+            dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
+        }
+        processor.insertDataToDataBaseBasic(
+            clazz = PaymentDocumentEntity::class,
+            columns = data.keys,
+            data = dataForInsert,
+            conn = conn
+        )
+
+        val savedDoc =
+            em.createNativeQuery("select payment_purpose, prop_15, prop_10, cur  from payment_document where order_date = '2022-01-01' and cur = '$cur'").resultList as List<Array<Any>>
+        assertThat(savedDoc.size).isEqualTo(testData.size)
+        testData.forEachIndexed { index, pair ->
+            assertThat(savedDoc[index][0]).isEqualTo(pair.first)
+            assertThat(savedDoc[index][1]).isEqualTo("END")
+            assertThat(savedDoc[index][2]).isEqualTo(pair.second)
+            assertThat(savedDoc[index][3].toString()).isEqualTo(cur)
+        }
+    }
+
+    @Test
+    fun `save data with null value via basic insert method`() {
+        val prop10 = "777_null_b"
+        val data = mutableMapOf<KMutableProperty1<out BaseEntity, *>, String?>(
+            PaymentDocumentEntity::account to null,
+            PaymentDocumentEntity::prop15 to "END",
+            PaymentDocumentEntity::paymentPurpose to null,
+            PaymentDocumentEntity::prop10 to prop10,
+        )
+        val dataForInsert = mutableListOf<String>()
+
+        dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
+        processor.insertDataToDataBaseBasic(
+            clazz = PaymentDocumentEntity::class,
+            columns = data.keys,
+            data = dataForInsert,
+            conn = conn
+        )
+
+        val savedDoc =
+            em.createNativeQuery("select payment_purpose, prop_15, prop_10, account_id  from payment_document where prop_10 = '$prop10'").resultList as List<Array<Any>>
+        assertThat(savedDoc.first()[0]).isNull()
+        assertThat(savedDoc.first()[1]).isEqualTo("END")
+        assertThat(savedDoc.first()[2]).isEqualTo(prop10)
+        assertThat(savedDoc.first()[3]).isNull()
+    }
+
+    @Test
+    fun `save data with incorrect value via basic insert method`() {
+        val prop10 = "777_inc_b"
+        val data = mutableMapOf<KMutableProperty1<out BaseEntity, *>, String?>(
+            PaymentDocumentEntity::account to "1",
+            PaymentDocumentEntity::prop15 to "END",
+            PaymentDocumentEntity::paymentPurpose to null,
+            PaymentDocumentEntity::prop10 to prop10,
+        )
+        val dataForInsert = mutableListOf<String>()
+
+        dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
+        assertThatThrownBy {
+            processor.insertDataToDataBaseBasic(
+                clazz = PaymentDocumentEntity::class,
+                columns = data.keys,
+                data = dataForInsert,
+                conn = conn
+            )
+        }.isInstanceOf(PSQLException::class.java)
+    }
+
     @Test
     fun `save several entity data via insert with prepared statement method`() {
         val cur = em.createNativeQuery("select code from currency limit 1").singleResult.toString()

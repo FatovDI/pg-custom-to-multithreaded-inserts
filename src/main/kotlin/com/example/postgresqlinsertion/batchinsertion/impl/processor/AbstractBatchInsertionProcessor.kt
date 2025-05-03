@@ -80,6 +80,16 @@ abstract class AbstractBatchInsertionProcessor {
     }
 
     /**
+     * save list data with basic insert method
+     * @param clazz - entity class
+     * @param data - list of string
+     * @param conn - DB connection
+     */
+    fun insertDataToDataBaseBasic(clazz: KClass<out BaseEntity>, data: List<String>, conn: Connection) {
+        insertDataToDataBaseBasic(getTableName(clazz), getColumnsStringByClass(clazz), data, conn)
+    }
+
+    /**
      * save list data with insert method
      * @param clazz - entity class
      * @param data - list of string
@@ -202,6 +212,22 @@ abstract class AbstractBatchInsertionProcessor {
             copyManager.copyIn(
                 "COPY BINARY $tableName ($columns) FROM STDIN",
                 from
+            )
+        }
+    }
+
+    /**
+     * save list data with basic insert method
+     * @param tableName - table name in DB
+     * @param columns - string of column separated by comma delimiter
+     * @param data - list of string
+     * @param conn - DB connection
+     */
+    fun insertDataToDataBaseBasic(tableName: String, columns: String, data: List<String>, conn: Connection) {
+
+        conn.createStatement().use { stmt ->
+            stmt.executeLargeUpdate(
+                data.joinToString("\n") { s -> "INSERT INTO $tableName ($columns) VALUES ($s);" }
             )
         }
     }

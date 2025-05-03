@@ -187,6 +187,19 @@ class PaymentDocumentService(
 
     }
 
+    fun saveByInsertBasic(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+
+        pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_BASIC).use { saver ->
+            for (i in 0 until count) {
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
+            }
+            saver.commit()
+        }
+
+    }
+
     fun saveByInsertWithPreparedStatement(count: Int, orderNumber: String? = null) {
         val currencies = currencyRepo.findAll()
         val accounts = accountRepo.findAll()
