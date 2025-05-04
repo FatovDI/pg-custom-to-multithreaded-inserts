@@ -85,8 +85,8 @@ abstract class AbstractBatchInsertionProcessor {
      * @param data - list of string
      * @param conn - DB connection
      */
-    fun insertDataToDataBaseBasic(clazz: KClass<out BaseEntity>, data: List<String>, conn: Connection) {
-        insertDataToDataBaseBasic(getTableName(clazz), getColumnsStringByClass(clazz), data, conn)
+    fun insertDataToDataBase(clazz: KClass<out BaseEntity>, data: List<String>, conn: Connection) {
+        insertDataToDataBase(getTableName(clazz), getColumnsStringByClass(clazz), data, conn)
     }
 
     /**
@@ -95,8 +95,8 @@ abstract class AbstractBatchInsertionProcessor {
      * @param data - list of string
      * @param conn - DB connection
      */
-    fun insertDataToDataBase(clazz: KClass<out BaseEntity>, data: List<String>, conn: Connection) {
-        insertDataToDataBase(getTableName(clazz), getColumnsStringByClass(clazz), data, conn)
+    fun insertDataToDataBaseMultiRow(clazz: KClass<out BaseEntity>, data: List<String>, conn: Connection) {
+        insertDataToDataBaseMultiRow(getTableName(clazz), getColumnsStringByClass(clazz), data, conn)
     }
 
     /**
@@ -217,13 +217,13 @@ abstract class AbstractBatchInsertionProcessor {
     }
 
     /**
-     * save list data with basic insert method
+     * save list data with insert method
      * @param tableName - table name in DB
      * @param columns - string of column separated by comma delimiter
      * @param data - list of string
      * @param conn - DB connection
      */
-    fun insertDataToDataBaseBasic(tableName: String, columns: String, data: List<String>, conn: Connection) {
+    fun insertDataToDataBase(tableName: String, columns: String, data: List<String>, conn: Connection) {
 
         conn.createStatement().use { stmt ->
             data.map { s ->
@@ -234,13 +234,13 @@ abstract class AbstractBatchInsertionProcessor {
     }
 
     /**
-     * save list data with insert method
+     * save list data with insert method multi row
      * @param tableName - table name in DB
      * @param columns - string of column separated by comma delimiter
      * @param data - list of string
      * @param conn - DB connection
      */
-    fun insertDataToDataBase(tableName: String, columns: String, data: List<String>, conn: Connection) {
+    fun insertDataToDataBaseMultiRow(tableName: String, columns: String, data: List<String>, conn: Connection) {
 
         conn.createStatement().use { stmt ->
             stmt.executeLargeUpdate(

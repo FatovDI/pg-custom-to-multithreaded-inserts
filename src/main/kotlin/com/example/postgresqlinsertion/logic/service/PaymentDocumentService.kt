@@ -174,6 +174,19 @@ class PaymentDocumentService(
 
     }
 
+    fun saveByInsertMultiRow(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+
+        pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
+            for (i in 0 until count) {
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
+            }
+            saver.commit()
+        }
+
+    }
+
     fun saveByInsert(count: Int) {
         val currencies = currencyRepo.findAll()
         val accounts = accountRepo.findAll()
@@ -187,13 +200,13 @@ class PaymentDocumentService(
 
     }
 
-    fun saveByInsertBasic(count: Int) {
+    fun saveByInsertWithPreparedStatementMultiRow(count: Int, orderNumber: String? = null) {
         val currencies = currencyRepo.findAll()
         val accounts = accountRepo.findAll()
 
-        pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_BASIC).use { saver ->
+        pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT_MULTI_ROW).use { saver ->
             for (i in 0 until count) {
-                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber))
             }
             saver.commit()
         }
@@ -205,19 +218,6 @@ class PaymentDocumentService(
         val accounts = accountRepo.findAll()
 
         pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
-            for (i in 0 until count) {
-                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber))
-            }
-            saver.commit()
-        }
-
-    }
-
-    fun saveByInsertWithPreparedStatementBasic(count: Int, orderNumber: String? = null) {
-        val currencies = currencyRepo.findAll()
-        val accounts = accountRepo.findAll()
-
-        pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT_BASIC).use { saver ->
             for (i in 0 until count) {
                 saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber))
             }
@@ -267,14 +267,14 @@ class PaymentDocumentService(
 
     }
 
-    fun saveByInsertAndProperty(count: Int) {
+    fun saveByInsertAndPropertyMultiRow(count: Int) {
         val currencies = currencyRepo.findAll()
         val accounts = accountRepo.findAll()
         val data = mutableMapOf<KMutableProperty1<PaymentDocumentEntity, *>, Any?>()
 
         log.info("start collect insertion $count by property")
 
-        pdBatchByPropertySaverFactory.getSaver(SaverType.INSERT).use { saver ->
+        pdBatchByPropertySaverFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
             for (i in 0 until count) {
                 fillRandomDataByKProperty(null, currencies.random(), accounts.random(), data)
                 saver.addDataForSave(data)
@@ -393,7 +393,7 @@ class PaymentDocumentService(
 
         val scriptForCreateIndexes = sqlHelper.dropIndex(PaymentDocumentEntity::class)
 
-        pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
+        pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT_MULTI_ROW).use { saver ->
             for (i in 0 until count) {
                 saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
             }

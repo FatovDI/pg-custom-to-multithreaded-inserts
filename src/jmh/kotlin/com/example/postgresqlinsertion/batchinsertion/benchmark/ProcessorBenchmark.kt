@@ -62,7 +62,7 @@ class ProcessorBenchmark {
             bh.consume(processor.getStringForInsert(data))
         }
 
-        processor.insertDataToDataBase(PaymentDocumentEntity::class, listOf(), ConnectionBlackhole(bh))
+        processor.insertDataToDataBaseMultiRow(PaymentDocumentEntity::class, listOf(), ConnectionBlackhole(bh))
     }
 
     fun saveDataByReflectionAndBinary(count: Int, bh: Blackhole) {
@@ -112,7 +112,7 @@ class ProcessorBenchmark {
             bh.consume(processor.getStringForInsert(data, nullValue))
         }
 
-        processor.insertDataToDataBase(PaymentDocumentEntity::class, data.keys, listOf(), ConnectionBlackhole(bh))
+        processor.insertDataToDataBaseMultiRow(PaymentDocumentEntity::class, data.keys, listOf(), ConnectionBlackhole(bh))
 
     }
 
@@ -137,7 +137,7 @@ class ProcessorBenchmark {
             bh.consume(processor.getStringForInsert(data.values, nullValue))
         }
 
-        processor.insertDataToDataBase(
+        processor.insertDataToDataBaseMultiRow(
             getTableName(PaymentDocumentEntity::class),
             data.keys.joinToString(","),
             listOf(),

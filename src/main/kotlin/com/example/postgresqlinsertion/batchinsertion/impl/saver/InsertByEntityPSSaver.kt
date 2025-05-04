@@ -21,7 +21,7 @@ open class InsertByEntityPSSaver<E: BaseEntity>(
     }
 
     override fun saveData() {
-        processor.insertDataToDataBasePreparedStatement(entityClass, dataForInsert, conn)
+        processor.insertDataToDataBasePreparedStatementBasic(entityClass, dataForInsert, conn)
         dataForInsert.clear()
     }
 }

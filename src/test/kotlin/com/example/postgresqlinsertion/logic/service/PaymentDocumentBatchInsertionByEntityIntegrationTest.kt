@@ -93,7 +93,7 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurpose = "save entity via insert method"
 
-        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
 
             saver.addDataForSave(
                 PaymentDocumentEntity(
@@ -117,7 +117,7 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurpose = "save entity via insert method"
 
-        batchInsertionFactory.getSaver(SaverType.INSERT_BASIC).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
 
             saver.addDataForSave(
                 PaymentDocumentEntity(
@@ -141,7 +141,7 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurpose = "save several entity via insert method"
 
-        batchInsertionFactory.getSaver(SaverType.INSERT_BASIC).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
 
             saver.addDataForSave(
                 PaymentDocumentEntity(
@@ -174,7 +174,7 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurpose = "save several entity via insert method"
 
-        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
 
             saver.addDataForSave(
                 PaymentDocumentEntity(
@@ -207,7 +207,7 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurpose = "save entity via insert method with prepared statement"
 
-        batchInsertionFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT_MULTI_ROW).use { saver ->
 
             saver.addDataForSave(
                 PaymentDocumentEntity(
@@ -231,7 +231,7 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurpose = "save several entity via insert method with prepared statement"
 
-        batchInsertionFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT_MULTI_ROW).use { saver ->
 
             saver.addDataForSave(
                 PaymentDocumentEntity(
@@ -321,7 +321,7 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurposeIns = "save entity via insert method"
         val paymentPurposeUpd = "update entity via insert method"
-        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
             saver.addDataForSave(
                 PaymentDocumentEntity(
                     paymentPurpose = paymentPurposeIns,
@@ -351,7 +351,7 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurposeIns = "save several entity via insert method"
         val paymentPurposeUpd = "update several entity via insert method"
-        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
 
             saver.addDataForSave(
                 PaymentDocumentEntity(
@@ -393,7 +393,7 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurposeIns = "save entity via insert method prepared statement"
         val paymentPurposeUpd = "update entity via insert method prepared statement"
-        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
             saver.addDataForSave(
                 PaymentDocumentEntity(
                     paymentPurpose = paymentPurposeIns,
@@ -423,7 +423,7 @@ internal class PaymentDocumentBatchInsertionByEntityIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurposeIns = "save several entity via insert method prepared statement"
         val paymentPurposeUpd = "update several entity via insert method prepared statement"
-        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
 
             saver.addDataForSave(
                 PaymentDocumentEntity(

@@ -22,7 +22,7 @@ open class InsertByPropertyPSSaver<E: BaseEntity>(
 
     override fun saveData() {
         super.saveData()
-        processor.insertDataToDataBasePreparedStatement(entityClass, columns!!, dataForInsert, conn)
+        processor.insertDataToDataBasePreparedStatementBasic(entityClass, columns!!, dataForInsert, conn)
         dataForInsert.clear()
     }
 }

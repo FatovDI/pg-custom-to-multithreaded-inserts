@@ -66,15 +66,6 @@ class PostgresBatchInsertionByPropertyProcessor(
         saveBinaryToDataBaseByCopyMethod(getTableName(clazz), getColumnsString(columns), from, conn)
     }
 
-    override fun insertDataToDataBaseBasic(
-        clazz: KClass<out BaseEntity>,
-        columns: Set<KProperty1<out BaseEntity, *>>,
-        data: List<String>,
-        conn: Connection
-    ) {
-        insertDataToDataBaseBasic(getTableName(clazz), getColumnsString(columns), data, conn)
-    }
-
     override fun insertDataToDataBase(
         clazz: KClass<out BaseEntity>,
         columns: Set<KProperty1<out BaseEntity, *>>,
@@ -82,6 +73,15 @@ class PostgresBatchInsertionByPropertyProcessor(
         conn: Connection
     ) {
         insertDataToDataBase(getTableName(clazz), getColumnsString(columns), data, conn)
+    }
+
+    override fun insertDataToDataBaseMultiRow(
+        clazz: KClass<out BaseEntity>,
+        columns: Set<KProperty1<out BaseEntity, *>>,
+        data: List<String>,
+        conn: Connection
+    ) {
+        insertDataToDataBaseMultiRow(getTableName(clazz), getColumnsString(columns), data, conn)
     }
 
     override fun insertDataToDataBasePreparedStatement(

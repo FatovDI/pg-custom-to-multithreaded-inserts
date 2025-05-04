@@ -85,7 +85,7 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurpose = "save data via insert method"
 
-        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
             val data = mutableMapOf(
                 PaymentDocumentEntity::paymentPurpose to paymentPurpose,
                 PaymentDocumentEntity::orderNumber to orderNumber,
@@ -108,7 +108,7 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurpose = "save several data via insert method"
 
-        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
             val data = mutableMapOf(
                 PaymentDocumentEntity::paymentPurpose to paymentPurpose,
                 PaymentDocumentEntity::orderNumber to orderNumber,
@@ -133,7 +133,7 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurpose = "save data via insert method"
 
-        batchInsertionFactory.getSaver(SaverType.INSERT_BASIC).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
             val data = mutableMapOf(
                 PaymentDocumentEntity::paymentPurpose to paymentPurpose,
                 PaymentDocumentEntity::orderNumber to orderNumber,
@@ -156,7 +156,7 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurpose = "save several data via insert method"
 
-        batchInsertionFactory.getSaver(SaverType.INSERT_BASIC).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
             val data = mutableMapOf(
                 PaymentDocumentEntity::paymentPurpose to paymentPurpose,
                 PaymentDocumentEntity::orderNumber to orderNumber,
@@ -181,7 +181,7 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurpose = "save data via insert method prepared statement"
 
-        batchInsertionFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT_MULTI_ROW).use { saver ->
             val data = mutableMapOf(
                 PaymentDocumentEntity::paymentPurpose to paymentPurpose,
                 PaymentDocumentEntity::orderNumber to orderNumber,
@@ -204,7 +204,7 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurpose = "save several data via insert method prepared statement"
 
-        batchInsertionFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT_MULTI_ROW).use { saver ->
             val data = mutableMapOf(
                 PaymentDocumentEntity::paymentPurpose to paymentPurpose,
                 PaymentDocumentEntity::orderNumber to orderNumber,
@@ -277,7 +277,7 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurposeIns = "save data via insert method"
         val paymentPurposeUpd = "update data via insert method"
-        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
             val insertData = mutableMapOf(
                 PaymentDocumentEntity::paymentPurpose to paymentPurposeIns,
                 PaymentDocumentEntity::orderNumber to orderNumber,
@@ -314,7 +314,7 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurposeIns = "save several data via insert method"
         val paymentPurposeUpd = "update several data via insert method"
-        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
             val insertData = mutableMapOf(
                 PaymentDocumentEntity::paymentPurpose to paymentPurposeIns,
                 PaymentDocumentEntity::orderNumber to orderNumber,
@@ -354,7 +354,7 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurposeIns = "save data via insert method prepared statement"
         val paymentPurposeUpd = "update data via insert method prepared statement"
-        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
             val insertData = mutableMapOf(
                 PaymentDocumentEntity::paymentPurpose to paymentPurposeIns,
                 PaymentDocumentEntity::orderNumber to orderNumber,
@@ -391,7 +391,7 @@ internal class PaymentDocumentBatchInsertionByPropertyIntegrationTest {
         val orderDate = LocalDate.now()
         val paymentPurposeIns = "save several data via insert method prepared statement"
         val paymentPurposeUpd = "update several data via insert method prepared statement"
-        batchInsertionFactory.getSaver(SaverType.INSERT).use { saver ->
+        batchInsertionFactory.getSaver(SaverType.INSERT_MULTI_ROW).use { saver ->
             val insertData = mutableMapOf(
                 PaymentDocumentEntity::paymentPurpose to paymentPurposeIns,
                 PaymentDocumentEntity::orderNumber to orderNumber,

@@ -6,24 +6,23 @@ import java.sql.Connection
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
-open class InsertByPropertyBasicSaver<E : BaseEntity>(
+open class InsertByPropertyMultiRowPSSaver<E: BaseEntity>(
     private val processor: BatchInsertionByPropertyProcessor,
     private val entityClass: KClass<E>,
     conn: Connection,
     batchSize: Int
 ) : AbstractBatchInsertionByPropertySaver<E>(conn, batchSize) {
 
-    private val nullValue = "NULL"
-    private val dataForInsert = mutableListOf<String>()
+    private val dataForInsert = mutableListOf<List<Any?>>()
 
     override fun addDataForSave(data: Map<out KProperty1<E, *>, Any?>) {
-        dataForInsert.add(processor.getStringForInsert(data, nullValue))
+        dataForInsert.add(data.values.toList())
         super.addDataForSave(data)
     }
 
     override fun saveData() {
         super.saveData()
-        processor.insertDataToDataBaseBasic(entityClass, columns!!, dataForInsert, conn)
+        processor.insertDataToDataBasePreparedStatement(entityClass, columns!!, dataForInsert, conn)
         dataForInsert.clear()
     }
 }

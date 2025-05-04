@@ -68,7 +68,7 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
         )
         val dataForInsert = mutableListOf<String>()
         dataForInsert.add(processor.getStringForInsert(data))
-        processor.insertDataToDataBase(clazz = PaymentDocumentEntity::class, data = dataForInsert, conn = conn)
+        processor.insertDataToDataBaseMultiRow(clazz = PaymentDocumentEntity::class, data = dataForInsert, conn = conn)
         val savedDoc =
             em.createNativeQuery("select id, payment_purpose  from payment_document where prop_10 = '$prop10'").resultList as List<Array<Any>>
         val pdId = savedDoc.first()[0].toString().toLong()
@@ -106,7 +106,7 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
         )
         val dataForInsert = mutableListOf<String>()
         dataForInsert.add(processor.getStringForInsert(data))
-        processor.insertDataToDataBaseBasic(clazz = PaymentDocumentEntity::class, data = dataForInsert, conn = conn)
+        processor.insertDataToDataBase(clazz = PaymentDocumentEntity::class, data = dataForInsert, conn = conn)
         val savedDoc =
             em.createNativeQuery("select account_id, prop_15, payment_purpose  from payment_document where prop_10 = '$prop10'").resultList as List<Array<Any>>
         assertThat(savedDoc.first()[0].toString()).isEqualTo(accountId)
@@ -230,7 +230,7 @@ internal class PostgresBatchInsertionByEntityProcessorTest {
             )
             dataForInsert.add(processor.getStringForInsert(data))
         }
-        processor.insertDataToDataBase(clazz = PaymentDocumentEntity::class, data = dataForInsert, conn = conn)
+        processor.insertDataToDataBaseMultiRow(clazz = PaymentDocumentEntity::class, data = dataForInsert, conn = conn)
 
         val savedDoc =
             em.createNativeQuery("select payment_purpose, prop_15, prop_10, cur  from payment_document where prop_15 = 'NEW' and cur = '$cur'").resultList as List<Array<Any>>

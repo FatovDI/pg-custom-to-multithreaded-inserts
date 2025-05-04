@@ -106,18 +106,18 @@ interface BatchInsertionByPropertyProcessor {
      * @param data - list of string
      * @param conn - DB connection
      */
-    fun insertDataToDataBaseBasic(
+    fun insertDataToDataBase(
         clazz: KClass<out BaseEntity>, columns: Set<KProperty1<out BaseEntity, *>>, data: List<String>, conn: Connection
     )
 
     /**
-     * save list data with insert method by property
+     * save list data with insert method by property multi row
      * @param clazz - entity class
      * @param columns - set of entity property
      * @param data - list of string
      * @param conn - DB connection
      */
-    fun insertDataToDataBase(
+    fun insertDataToDataBaseMultiRow(
         clazz: KClass<out BaseEntity>, columns: Set<KProperty1<out BaseEntity, *>>, data: List<String>, conn: Connection
     )
 

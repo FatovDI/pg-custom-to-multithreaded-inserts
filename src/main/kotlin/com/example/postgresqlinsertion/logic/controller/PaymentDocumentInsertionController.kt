@@ -120,6 +120,18 @@ class PaymentDocumentInsertionController(
         )
     }
 
+    @PostMapping("/insert-multi-row/{count}")
+    fun insertViaInsertMultiRow(@PathVariable count: Int): ResponseDto {
+        val time = measureTimeMillis {
+            service.saveByInsertMultiRow(count)
+        }
+        return ResponseDto(
+            name = "Insert method multi row",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
     @PostMapping("/insert/{count}")
     fun insertViaInsert(@PathVariable count: Int): ResponseDto {
         val time = measureTimeMillis {
@@ -132,13 +144,16 @@ class PaymentDocumentInsertionController(
         )
     }
 
-    @PostMapping("/insert-basic/{count}")
-    fun insertViaInsertBasic(@PathVariable count: Int): ResponseDto {
+    @PostMapping("/insert-prepared-statement-multi-row/{count}")
+    fun insertViaInsertWithPreparedStatementMultiRow(
+        @PathVariable count: Int,
+        @RequestParam orderNumber: String? = null
+    ): ResponseDto {
         val time = measureTimeMillis {
-            service.saveByInsertBasic(count)
+            service.saveByInsertWithPreparedStatementMultiRow(count, orderNumber)
         }
         return ResponseDto(
-            name = "Insert method basic",
+            name = "Insert method PS multi row",
             count = count,
             time = getTimeString(time)
         )
@@ -153,22 +168,7 @@ class PaymentDocumentInsertionController(
             service.saveByInsertWithPreparedStatement(count, orderNumber)
         }
         return ResponseDto(
-            name = "Insert method with prepared statement",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
-
-    @PostMapping("/insert-prepared-statement-basic/{count}")
-    fun insertViaInsertWithPreparedStatementBasic(
-        @PathVariable count: Int,
-        @RequestParam orderNumber: String? = null
-    ): ResponseDto {
-        val time = measureTimeMillis {
-            service.saveByInsertWithPreparedStatementBasic(count, orderNumber)
-        }
-        return ResponseDto(
-            name = "Insert method with PS Basic",
+            name = "Insert method PS",
             count = count,
             time = getTimeString(time)
         )
@@ -183,7 +183,7 @@ class PaymentDocumentInsertionController(
             service.saveByInsertWithPreparedStatementAndUnnest(count, orderNumber)
         }
         return ResponseDto(
-            name = "Insert method with prepared statement and unnest",
+            name = "Insert method PS unnest",
             count = count,
             time = getTimeString(time)
         )
@@ -213,13 +213,13 @@ class PaymentDocumentInsertionController(
         )
     }
 
-    @PostMapping("/insert-by-property/{count}")
+    @PostMapping("/insert-by-property-multi-row/{count}")
     fun insertViaInsertAndProperty(@PathVariable count: Int): ResponseDto {
         val time = measureTimeMillis {
-            service.saveByInsertAndProperty(count)
+            service.saveByInsertAndPropertyMultiRow(count)
         }
         return ResponseDto(
-            name = "Insert method by property",
+            name = "Insert method by property multi row",
             count = count,
             time = getTimeString(time)
         )

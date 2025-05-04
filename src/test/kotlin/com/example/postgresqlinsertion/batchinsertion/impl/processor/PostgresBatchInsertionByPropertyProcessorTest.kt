@@ -73,7 +73,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
         )
         val dataForInsert = mutableListOf<String>()
         dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
-        processor.insertDataToDataBase(
+        processor.insertDataToDataBaseMultiRow(
             clazz = PaymentDocumentEntity::class,
             columns = data.keys,
             data = dataForInsert,
@@ -120,7 +120,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
         )
         val dataForInsert = mutableListOf<String>()
         dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
-        processor.insertDataToDataBase(
+        processor.insertDataToDataBaseMultiRow(
             clazz = PaymentDocumentEntity::class,
             columns = data.keys,
             data = dataForInsert,
@@ -173,7 +173,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
             data[PaymentDocumentEntity::prop10] = it.second
             dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
         }
-        processor.insertDataToDataBase(
+        processor.insertDataToDataBaseMultiRow(
             clazz = PaymentDocumentEntity::class,
             columns = data.keys,
             data = dataForInsert,
@@ -235,7 +235,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
             data[PaymentDocumentEntity::prop10] = it.second
             dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
         }
-        processor.insertDataToDataBase(
+        processor.insertDataToDataBaseMultiRow(
             clazz = PaymentDocumentEntity::class,
             columns = data.keys,
             data = dataForInsert,
@@ -265,7 +265,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
         val dataForInsert = mutableListOf<String>()
 
         dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
-        processor.insertDataToDataBase(
+        processor.insertDataToDataBaseMultiRow(
             clazz = PaymentDocumentEntity::class,
             columns = data.keys,
             data = dataForInsert,
@@ -293,7 +293,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
 
         dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
         assertThatThrownBy {
-            processor.insertDataToDataBase(
+            processor.insertDataToDataBaseMultiRow(
                 clazz = PaymentDocumentEntity::class,
                 columns = data.keys,
                 data = dataForInsert,
@@ -319,7 +319,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
             data[PaymentDocumentEntity::prop10] = it.second
             dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
         }
-        processor.insertDataToDataBaseBasic(
+        processor.insertDataToDataBase(
             clazz = PaymentDocumentEntity::class,
             columns = data.keys,
             data = dataForInsert,
@@ -349,7 +349,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
         val dataForInsert = mutableListOf<String>()
 
         dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
-        processor.insertDataToDataBaseBasic(
+        processor.insertDataToDataBase(
             clazz = PaymentDocumentEntity::class,
             columns = data.keys,
             data = dataForInsert,
@@ -377,7 +377,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
 
         dataForInsert.add(processor.getStringForInsert(data = data, nullValue = nullValue))
         assertThatThrownBy {
-            processor.insertDataToDataBaseBasic(
+            processor.insertDataToDataBase(
                 clazz = PaymentDocumentEntity::class,
                 columns = data.keys,
                 data = dataForInsert,
