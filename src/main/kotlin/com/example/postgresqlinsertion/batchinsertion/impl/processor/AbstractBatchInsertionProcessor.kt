@@ -226,9 +226,15 @@ abstract class AbstractBatchInsertionProcessor {
     fun insertDataToDataBaseBasic(tableName: String, columns: String, data: List<String>, conn: Connection) {
 
         conn.createStatement().use { stmt ->
-            stmt.executeLargeUpdate(
-                data.joinToString("\n") { s -> "INSERT INTO $tableName ($columns) VALUES ($s);" }
-            )
+            data.map { s ->
+                stmt.addBatch( "INSERT INTO $tableName ($columns) VALUES ($s);")
+            }
+            stmt.executeBatch()
+//            val str = data.joinToString("\n") { s -> "INSERT INTO $tableName ($columns) VALUES ($s);" }
+//            println(str)
+//            stmt.executeLargeUpdate(
+//                str
+//            )
         }
     }
 
