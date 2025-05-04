@@ -159,6 +159,21 @@ class PaymentDocumentInsertionController(
         )
     }
 
+    @PostMapping("/insert-prepared-statement-basic/{count}")
+    fun insertViaInsertWithPreparedStatementBasic(
+        @PathVariable count: Int,
+        @RequestParam orderNumber: String? = null
+    ): ResponseDto {
+        val time = measureTimeMillis {
+            service.saveByInsertWithPreparedStatementBasic(count, orderNumber)
+        }
+        return ResponseDto(
+            name = "Insert method with PS Basic",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
     @PostMapping("/insert-prepared-statement-unnest/{count}")
     fun insertViaInsertWithPreparedStatementUnnest(
         @PathVariable count: Int,

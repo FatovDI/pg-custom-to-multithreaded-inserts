@@ -230,11 +230,6 @@ abstract class AbstractBatchInsertionProcessor {
                 stmt.addBatch( "INSERT INTO $tableName ($columns) VALUES ($s);")
             }
             stmt.executeBatch()
-//            val str = data.joinToString("\n") { s -> "INSERT INTO $tableName ($columns) VALUES ($s);" }
-//            println(str)
-//            stmt.executeLargeUpdate(
-//                str
-//            )
         }
     }
 
@@ -282,6 +277,30 @@ abstract class AbstractBatchInsertionProcessor {
                 }
             }
             stmt.executeLargeUpdate()
+        }
+    }
+
+    /**
+     * save list data with insert method and basic prepared statement
+     * @param tableName - table name in DB
+     * @param columns - list of columns
+     * @param data - list of data by columns
+     * @param conn - DB connection
+     */
+    fun insertDataToDataBasePreparedStatementBasic(tableName: String, columns: List<String>, data: List<Collection<Any?>>, conn: Connection) {
+
+        val params = columns.joinToString(", ") { "?" }
+
+        conn.prepareStatement(
+            "INSERT INTO $tableName (${columns.joinToString(",")}) VALUES ($params);"
+        ).use { stmt ->
+            data.forEach { str ->
+                str.forEachIndexed { idx, col ->
+                    stmt.setObject(idx + 1, col)
+                }
+                stmt.addBatch()
+            }
+            stmt.executeBatch()
         }
     }
 

@@ -93,6 +93,15 @@ class PostgresBatchInsertionByPropertyProcessor(
         insertDataToDataBasePreparedStatement(getTableName(clazz), getColumns(columns), data, conn)
     }
 
+    override fun insertDataToDataBasePreparedStatementBasic(
+        clazz: KClass<out BaseEntity>,
+        columns: Set<KProperty1<out BaseEntity, *>>,
+        data: List<List<Any?>>,
+        conn: Connection
+    ) {
+        insertDataToDataBasePreparedStatementBasic(getTableName(clazz), getColumns(columns), data, conn)
+    }
+
     override fun insertDataToDataBasePreparedStatementAndUnnest(
         clazz: KClass<out BaseEntity>,
         columns: Set<KProperty1<out BaseEntity, *>>,

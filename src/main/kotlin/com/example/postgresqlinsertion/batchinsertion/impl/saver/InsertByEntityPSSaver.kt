@@ -6,7 +6,7 @@ import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import java.sql.Connection
 import kotlin.reflect.KClass
 
-open class InsertByEntityPreparedStatementSaver<E: BaseEntity>(
+open class InsertByEntityPSSaver<E: BaseEntity>(
     private val processor: BatchInsertionByEntityProcessor,
     private val entityClass: KClass<E>,
     conn: Connection,

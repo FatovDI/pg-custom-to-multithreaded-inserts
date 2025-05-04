@@ -46,6 +46,10 @@ POST http://localhost:8080/test-insertion/insert-prepared-statement/200
 Content-Type: application/json
 
 ###
+POST http://localhost:8080/test-insertion/insert-prepared-statement-basic/200
+Content-Type: application/json
+
+###
 POST http://localhost:8080/test-insertion/insert-prepared-statement-unnest/200
 Content-Type: application/json
 

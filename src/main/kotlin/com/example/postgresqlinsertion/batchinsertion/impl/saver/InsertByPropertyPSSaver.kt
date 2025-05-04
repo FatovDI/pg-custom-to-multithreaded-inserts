@@ -6,7 +6,7 @@ import java.sql.Connection
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
-open class InsertByPropertyPreparedStatementSaver<E: BaseEntity>(
+open class InsertByPropertyPSSaver<E: BaseEntity>(
     private val processor: BatchInsertionByPropertyProcessor,
     private val entityClass: KClass<E>,
     conn: Connection,

@@ -136,6 +136,20 @@ interface BatchInsertionByPropertyProcessor {
     )
 
     /**
+     * save list data with insert method and prepared statement basic
+     * @param clazz - entity class
+     * @param columns - set of entity property
+     * @param data - list of string by columns
+     * @param conn - DB connection
+     */
+    fun insertDataToDataBasePreparedStatementBasic(
+        clazz: KClass<out BaseEntity>,
+        columns: Set<KProperty1<out BaseEntity, *>>,
+        data: List<List<Any?>>,
+        conn: Connection
+    )
+
+    /**
      * save list data with insert method and prepared statement and select data by unnest
      * @param clazz - entity class
      * @param columns - columns for get pg Types
