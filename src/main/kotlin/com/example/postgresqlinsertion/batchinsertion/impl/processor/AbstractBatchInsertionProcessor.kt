@@ -260,7 +260,12 @@ abstract class AbstractBatchInsertionProcessor {
      * @param data - list of data by columns
      * @param conn - DB connection
      */
-    fun insertDataToDataBasePreparedStatement(tableName: String, columns: List<String>, data: List<Collection<Any?>>, conn: Connection) {
+    fun insertDataToDataBasePreparedStatementMultiRow(
+        tableName: String,
+        columns: List<String>,
+        data: List<Collection<Any?>>,
+        conn: Connection
+    ) {
 
         val params = columns.joinToString(", ") { "?" }
 
@@ -287,7 +292,12 @@ abstract class AbstractBatchInsertionProcessor {
      * @param data - list of data by columns
      * @param conn - DB connection
      */
-    fun insertDataToDataBasePreparedStatementBasic(tableName: String, columns: List<String>, data: List<Collection<Any?>>, conn: Connection) {
+    fun insertDataToDataBasePreparedStatementBasic(
+        tableName: String,
+        columns: List<String>,
+        data: List<Collection<Any?>>,
+        conn: Connection
+    ) {
 
         val params = columns.joinToString(", ") { "?" }
 

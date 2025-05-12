@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService
 import javax.sql.DataSource
 import kotlin.reflect.KClass
 
-class ConcurrentSaverHandler<E : BaseEntity>(
+class CopyByEntityConcurrentSaverHandler<E : BaseEntity>(
     private val processor: BatchInsertionByEntityProcessor,
     private val entityClass: KClass<E>,
     private val dataSource: DataSource,

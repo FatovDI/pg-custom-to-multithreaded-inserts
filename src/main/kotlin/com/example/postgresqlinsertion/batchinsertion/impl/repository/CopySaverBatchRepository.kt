@@ -55,9 +55,9 @@ abstract class CopySaverBatchRepository<E : BaseEntity>(
         checkTransactionIsOpen()
 
         val handler = TransactionSynchronizationManager.getResource(concurrentSaverHandlerName)
-            ?.let { it as ConcurrentSaverHandler<E> }
+            ?.let { it as CopyByEntityConcurrentSaverHandler<E> }
             ?: let {
-                val handler = ConcurrentSaverHandler(
+                val handler = CopyByEntityConcurrentSaverHandler(
                     processor = processor,
                     entityClass = entityClass,
                     dataSource = dataSource,

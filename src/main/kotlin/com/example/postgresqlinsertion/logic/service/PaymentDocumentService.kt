@@ -35,6 +35,19 @@ class PaymentDocumentService(
 
     private val log by logger()
 
+    fun saveByCopyBinaryConcurrent(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+
+        pdBatchByEntitySaverFactory.getSaver(SaverType.COPY_BINARY_CONCURRENT).use { saver ->
+            for (i in 0 until count) {
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
+            }
+            saver.commit()
+        }
+
+    }
+
     fun saveByCopyConcurrent(count: Int) {
         val currencies = currencyRepo.findAll()
         val accounts = accountRepo.findAll()

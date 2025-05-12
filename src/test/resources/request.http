@@ -2,6 +2,10 @@ POST http://localhost:8080/test-insertion/copy/200
 Content-Type: application/json
 
 ###
+POST http://localhost:8080/test-insertion/copy-binary-concurrent/200
+Content-Type: application/json
+
+###
 POST http://localhost:8080/test-insertion/copy-concurrent/200
 Content-Type: application/json
 
@@ -38,7 +42,7 @@ POST http://localhost:8080/test-insertion/insert/200
 Content-Type: application/json
 
 ###
-POST http://localhost:8080/test-insertion/insert-basic/200
+POST http://localhost:8080/test-insertion/insert-multi-row/200
 Content-Type: application/json
 
 ###
@@ -46,7 +50,7 @@ POST http://localhost:8080/test-insertion/insert-prepared-statement/200
 Content-Type: application/json
 
 ###
-POST http://localhost:8080/test-insertion/insert-prepared-statement-basic/200
+POST http://localhost:8080/test-insertion/insert-prepared-statement-multi-row/200
 Content-Type: application/json
 
 ###
@@ -54,7 +58,7 @@ POST http://localhost:8080/test-insertion/insert-prepared-statement-unnest/200
 Content-Type: application/json
 
 ###
-POST http://localhost:8080/test-insertion/insert-prepared-statement/200?orderNumber=NumberForUpdate
+POST http://localhost:8080/test-insertion/insert-prepared-statement/200
 Content-Type: application/json
 
 ###

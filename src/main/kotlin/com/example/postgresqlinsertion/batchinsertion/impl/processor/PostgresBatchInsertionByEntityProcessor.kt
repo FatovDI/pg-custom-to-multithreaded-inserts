@@ -56,7 +56,7 @@ class PostgresBatchInsertionByEntityProcessor(
         data: List<List<Any?>>,
         conn: Connection
     ) {
-        insertDataToDataBasePreparedStatement(getTableName(clazz), getColumnsByClass(clazz), data, conn)
+        insertDataToDataBasePreparedStatementMultiRow(getTableName(clazz), getColumnsByClass(clazz), data, conn)
     }
 
     /**

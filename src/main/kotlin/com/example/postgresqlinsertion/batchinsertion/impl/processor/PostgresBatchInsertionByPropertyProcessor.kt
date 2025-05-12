@@ -90,7 +90,7 @@ class PostgresBatchInsertionByPropertyProcessor(
         data: List<List<Any?>>,
         conn: Connection
     ) {
-        insertDataToDataBasePreparedStatement(getTableName(clazz), getColumns(columns), data, conn)
+        insertDataToDataBasePreparedStatementMultiRow(getTableName(clazz), getColumns(columns), data, conn)
     }
 
     override fun insertDataToDataBasePreparedStatementBasic(

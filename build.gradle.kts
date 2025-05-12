@@ -25,7 +25,7 @@ dependencies {
 	implementation("jakarta.persistence:jakarta.persistence-api")
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.openjdk.jmh:jmh-core:1.36")
-	implementation("org.postgresql:postgresql:42.6.0")
+	implementation("org.postgresql:postgresql:42.7.5")
 	implementation("org.hibernate:hibernate-jpamodelgen")
 
 	kapt("org.hibernate:hibernate-jpamodelgen")

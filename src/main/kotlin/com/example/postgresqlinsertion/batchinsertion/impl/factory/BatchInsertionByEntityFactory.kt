@@ -4,7 +4,8 @@ import com.example.postgresqlinsertion.batchinsertion.api.factory.BatchInsertion
 import com.example.postgresqlinsertion.batchinsertion.api.factory.SaverType
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByEntityProcessor
 import com.example.postgresqlinsertion.batchinsertion.api.saver.BatchInsertionByEntitySaver
-import com.example.postgresqlinsertion.batchinsertion.impl.repository.ConcurrentSaverHandler
+import com.example.postgresqlinsertion.batchinsertion.impl.repository.CopyBinaryByEntityConcurrentSaverHandler
+import com.example.postgresqlinsertion.batchinsertion.impl.repository.CopyByEntityConcurrentSaverHandler
 import com.example.postgresqlinsertion.batchinsertion.impl.saver.*
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,7 +46,8 @@ abstract class BatchInsertionByEntityFactory<E: BaseEntity>(
             SaverType.COPY_BINARY -> CopyBinaryByEntitySaver(processor, entityClass, conn, batchSize)
             SaverType.COPY_VIA_FILE -> CopyViaFileByEntitySaver(processor, entityClass, conn, batchSize)
             SaverType.COPY_BINARY_VIA_FILE -> CopyBinaryViaFileByEntitySaver(processor, entityClass, conn, batchSize)
-            SaverType.COPY_CONCURRENT -> ConcurrentSaverHandler(processor, entityClass, dataSource, batchSize, concurrentSavers, executorService)
+            SaverType.COPY_CONCURRENT -> CopyByEntityConcurrentSaverHandler(processor, entityClass, dataSource, batchSize, concurrentSavers, executorService)
+            SaverType.COPY_BINARY_CONCURRENT -> CopyBinaryByEntityConcurrentSaverHandler(processor, entityClass, dataSource, batchSize, concurrentSavers, executorService)
             SaverType.INSERT -> InsertByEntitySaver(processor, entityClass, conn, batchSize)
             SaverType.INSERT_MULTI_ROW -> InsertByEntityMultiRowSaver(processor, entityClass, conn, batchSize)
             SaverType.INSERT_PREPARED_STATEMENT -> InsertByEntityPSSaver(processor, entityClass, conn, batchSize)
