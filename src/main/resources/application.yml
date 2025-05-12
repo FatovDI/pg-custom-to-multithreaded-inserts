@@ -2,8 +2,8 @@
 
 batch_insertion:
   batch_size: 5000
-  pool_size: 8
-  concurrent_saves: 4
+  pool_size: 24
+  concurrent_saves: 12
 
 logging:
   level:
