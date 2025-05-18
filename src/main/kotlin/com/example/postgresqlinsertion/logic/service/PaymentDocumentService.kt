@@ -245,7 +245,7 @@ class PaymentDocumentService(
 
         pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT_MULTI_ROW).use { saver ->
             for (i in 0 until count) {
-                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber))
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber = orderNumber))
             }
             saver.commit()
         }
