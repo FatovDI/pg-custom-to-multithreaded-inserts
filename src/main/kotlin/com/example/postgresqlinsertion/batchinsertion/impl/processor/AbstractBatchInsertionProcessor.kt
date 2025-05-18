@@ -390,7 +390,8 @@ abstract class AbstractBatchInsertionProcessor {
     fun updateDataToDataBasePreparedStatement(dataForUpdate: DataForUpdate, conn: Connection): Int {
 
         return conn.prepareStatement(
-            "UPDATE ${dataForUpdate.tableName} SET ${dataForUpdate.columns.joinToString(", ") { "$it=?" }} where ${dataForUpdate.conditions.joinToString { "$it=? " }}"
+            """UPDATE ${dataForUpdate.tableName} SET ${dataForUpdate.columns.joinToString(", ") { "$it=?" }} 
+                            where ${dataForUpdate.conditions.joinToString { "$it=? " }}"""
         ).use { stmt ->
             dataForUpdate.data.forEach { str ->
                 str.forEachIndexed { idx, col ->
