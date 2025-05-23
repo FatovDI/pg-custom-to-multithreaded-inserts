@@ -4,8 +4,10 @@ import com.example.postgresqlinsertion.batchinsertion.api.factory.BatchInsertion
 import com.example.postgresqlinsertion.batchinsertion.api.factory.SaverType
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByEntityProcessor
 import com.example.postgresqlinsertion.batchinsertion.api.saver.BatchInsertionByEntitySaver
+import com.example.postgresqlinsertion.batchinsertion.impl.repository.CopyBinaryByEntityConcurrentAtomicSaverHandler
 import com.example.postgresqlinsertion.batchinsertion.impl.repository.CopyBinaryByEntityConcurrentSaverHandler
 import com.example.postgresqlinsertion.batchinsertion.impl.repository.CopyByEntityConcurrentSaverHandler
+import com.example.postgresqlinsertion.batchinsertion.impl.repository.InsertByEntityConcurrentAtomicSaverHandler
 import com.example.postgresqlinsertion.batchinsertion.impl.saver.*
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import org.springframework.beans.factory.annotation.Autowired
@@ -48,11 +50,13 @@ abstract class BatchInsertionByEntityFactory<E: BaseEntity>(
             SaverType.COPY_BINARY_VIA_FILE -> CopyBinaryViaFileByEntitySaver(processor, entityClass, conn, batchSize)
             SaverType.COPY_CONCURRENT -> CopyByEntityConcurrentSaverHandler(processor, entityClass, dataSource, batchSize, concurrentSavers, executorService)
             SaverType.COPY_BINARY_CONCURRENT -> CopyBinaryByEntityConcurrentSaverHandler(processor, entityClass, dataSource, batchSize, concurrentSavers, executorService)
+            SaverType.COPY_BINARY_CONCURRENT_ATOMIC -> CopyBinaryByEntityConcurrentAtomicSaverHandler(processor, entityClass, dataSource, batchSize, concurrentSavers, executorService)
             SaverType.INSERT -> InsertByEntitySaver(processor, entityClass, conn, batchSize)
             SaverType.INSERT_MULTI_ROW -> InsertByEntityMultiRowSaver(processor, entityClass, conn, batchSize)
             SaverType.INSERT_PREPARED_STATEMENT -> InsertByEntityPSSaver(processor, entityClass, conn, batchSize)
             SaverType.INSERT_PREPARED_STATEMENT_MULTI_ROW -> InsertByEntityMultiRowPSSaver(processor, entityClass, conn, batchSize)
             SaverType.INSERT_PREPARED_STATEMENT_UNNEST -> InsertByEntityPSUnnestSaver(processor, entityClass, conn, batchSize)
+            SaverType.INSERT_PS_MR_CONCURRENT_ATOMIC -> InsertByEntityConcurrentAtomicSaverHandler(processor, entityClass, dataSource, batchSize, concurrentSavers, executorService)
             SaverType.UPDATE -> UpdateByEntitySaver(processor, entityClass, conn, batchSize)
             SaverType.UPDATE_PREPARED_STATEMENT -> UpdateByEntityPreparedStatementSaver(processor, entityClass, conn, batchSize)
         }

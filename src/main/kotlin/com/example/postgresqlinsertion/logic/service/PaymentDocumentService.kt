@@ -16,6 +16,7 @@ import com.example.postgresqlinsertion.logic.repository.PaymentDocumentCustomRep
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.UUID
 import javax.sql.DataSource
 import kotlin.random.Random
 import kotlin.reflect.KMutableProperty1
@@ -34,6 +35,32 @@ class PaymentDocumentService(
 ) {
 
     private val log by logger()
+
+    fun saveByCopyBinaryConcurrentAndAtomicPreparedTransaction(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+
+        pdBatchByEntitySaverFactory.getSaver(SaverType.COPY_BINARY_CONCURRENT_ATOMIC).use { saver ->
+            for (i in 0 until count) {
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
+            }
+            saver.commit()
+        }
+
+    }
+
+    fun insertConcurrentAndAtomicPreparedTransaction(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+
+        pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PS_MR_CONCURRENT_ATOMIC).use { saver ->
+            for (i in 0 until count) {
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
+            }
+            saver.commit()
+        }
+
+    }
 
     fun saveByCopyBinaryConcurrent(count: Int) {
         val currencies = currencyRepo.findAll()

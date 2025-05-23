@@ -267,6 +267,8 @@ abstract class AbstractBatchInsertionProcessor {
         conn: Connection
     ) {
 
+        if (data.isEmpty()) return
+
         val params = columns.joinToString(", ") { "?" }
 
         conn.prepareStatement(

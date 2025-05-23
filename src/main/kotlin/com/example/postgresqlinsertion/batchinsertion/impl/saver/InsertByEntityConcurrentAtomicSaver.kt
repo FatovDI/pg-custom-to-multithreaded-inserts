@@ -4,17 +4,19 @@ import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInserti
 import com.example.postgresqlinsertion.batchinsertion.exception.BatchInsertionException
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import java.sql.Connection
+import java.util.UUID
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
 import kotlin.reflect.KClass
 
-open class CopyBinaryByEntityConcurrentSaver<E : BaseEntity>(
+class InsertByEntityConcurrentAtomicSaver<E : BaseEntity>(
     processor: BatchInsertionByEntityProcessor,
     entityClass: KClass<E>,
     conn: Connection,
     batchSize: Int,
-    private val executorService: ExecutorService
-) : CopyBinaryByEntitySaver<E>(processor, entityClass, conn, batchSize) {
+    private val executorService: ExecutorService,
+    val transactionId: UUID,
+) : InsertByEntityMultiRowPSSaver<E>(processor, entityClass, conn, batchSize) {
 
     private var saveDataJob: Future<*>? = null
 
@@ -31,10 +33,13 @@ open class CopyBinaryByEntityConcurrentSaver<E : BaseEntity>(
     override fun commit() {
         checkSaveDataJob()
         super.saveData()
+        conn.createStatement().use { stmt ->
+            stmt.execute("PREPARE TRANSACTION '$transactionId';")
+        }
         conn.commit()
     }
 
-    protected fun checkSaveDataJob() {
+    private fun checkSaveDataJob() {
         try {
             saveDataJob?.get()
         } catch (e: Exception) {

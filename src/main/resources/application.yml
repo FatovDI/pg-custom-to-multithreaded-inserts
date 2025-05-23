@@ -2,8 +2,8 @@
 
 batch_insertion:
   batch_size: 5000
-  pool_size: 24
-  concurrent_saves: 12
+  pool_size: 8
+  concurrent_saves: 4
 
 logging:
   level:
@@ -15,7 +15,7 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        generate_statistics: true
+        generate_statistics: false
         ddl-auto: validate
         jdbc:
           batch_size: ${batch_insertion.batch_size}
@@ -31,7 +31,7 @@ spring:
     url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}?stringtype=unspecified
     hikari:
       schema: "test_insertion"
-      maximum-pool-size: 20
+      maximum-pool-size: 100
       data-source-properties:
         reWriteBatchedInserts: true
 #      dataSourceClassName: com.zaxxer.hikari.HikariDataSource

@@ -35,6 +35,18 @@ class PaymentDocumentInsertionController(
         )
     }
 
+    @PostMapping("/insert-concurrent-and-atomic-PT/{count}")
+    fun insertConcurrentAndAtomicPreparedTransaction(@PathVariable count: Int): ResponseDto {
+        val time = measureTimeMillis {
+            service.insertConcurrentAndAtomicPreparedTransaction(count)
+        }
+        return ResponseDto(
+            name = "Insert concurrent atomic PT",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
     @PostMapping("/copy-binary-concurrent/{count}")
     fun insertViaCopyBinaryConcurrent(@PathVariable count: Int): ResponseDto {
         val time = measureTimeMillis {
@@ -42,6 +54,18 @@ class PaymentDocumentInsertionController(
         }
         return ResponseDto(
             name = "Copy binary concurrent method",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
+    @PostMapping("/copy-binary-concurrent-atomic/{count}")
+    fun insertViaCopyBinaryConcurrentAtomic(@PathVariable count: Int): ResponseDto {
+        val time = measureTimeMillis {
+            service.saveByCopyBinaryConcurrentAndAtomicPreparedTransaction(count)
+        }
+        return ResponseDto(
+            name = "Copy binary concurrent atomic",
             count = count,
             time = getTimeString(time)
         )

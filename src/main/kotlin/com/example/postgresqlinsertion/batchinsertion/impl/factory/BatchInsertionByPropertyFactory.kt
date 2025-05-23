@@ -37,6 +37,8 @@ abstract class BatchInsertionByPropertyFactory<E: BaseEntity>(
             SaverType.UPDATE_PREPARED_STATEMENT -> UpdateByPropertyPreparedStatementSaver(processor, entityClass, conn, batchSize)
             SaverType.COPY_CONCURRENT -> TODO()
             SaverType.COPY_BINARY_CONCURRENT -> TODO()
+            SaverType.INSERT_PS_MR_CONCURRENT_ATOMIC -> TODO()
+            SaverType.COPY_BINARY_CONCURRENT_ATOMIC -> TODO()
         }
 
     }
