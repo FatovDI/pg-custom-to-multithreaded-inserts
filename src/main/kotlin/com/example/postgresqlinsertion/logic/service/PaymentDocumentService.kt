@@ -68,15 +68,25 @@ class PaymentDocumentService(
         val currencies = currencyRepo.findAll()
         val accounts = accountRepo.findAll()
         val transactionId = Generators.timeBasedEpochGenerator().generate()
+        val conn = dataSource.connection
 
-        jdbcTemplate.update("INSERT INTO active_transaction (transaction_id) VALUES (?)", transactionId)
+        conn.prepareStatement("INSERT INTO active_transaction (transaction_id) VALUES (?)").use { stmt ->
+            stmt.setObject(1, transactionId)
+            stmt.executeUpdate()
+        }
+
         pdBatchByEntitySaverFactory.getSaver(SaverType.COPY_CONCURRENT).use { saver ->
             for (i in 0 until count) {
                 saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
             }
             saver.commit()
         }
-        jdbcTemplate.update("DELETE FROM active_transaction WHERE transaction_id =?", transactionId)
+
+        conn.prepareStatement("DELETE FROM active_transaction WHERE transaction_id =?").use { stmt ->
+            stmt.setObject(1, transactionId)
+            stmt.executeUpdate()
+        }
+        conn.close()
     }
 
     fun saveByCopy(count: Int) {
