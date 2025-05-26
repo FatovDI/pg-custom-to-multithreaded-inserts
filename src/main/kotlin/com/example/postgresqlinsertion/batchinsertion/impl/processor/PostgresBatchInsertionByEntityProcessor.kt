@@ -25,7 +25,7 @@ class PostgresBatchInsertionByEntityProcessor(
     }
 
     override fun addDataForCreateWithBinary(data: BaseEntity, outputStream: DataOutputStream) {
-        val fields = data.javaClass.declaredFields
+        val fields = getFieldsWithoutId(data::class)
         outputStream.writeShort(fields.size)
         fields.map { field ->
             field.trySetAccessible()

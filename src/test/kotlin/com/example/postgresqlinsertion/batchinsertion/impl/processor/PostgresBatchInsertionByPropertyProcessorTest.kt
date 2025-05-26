@@ -20,6 +20,7 @@ import java.io.DataOutputStream
 import java.io.File
 import java.io.FileReader
 import java.math.BigDecimal
+import java.sql.BatchUpdateException
 import java.sql.Connection
 import java.sql.Date
 import java.time.LocalDate
@@ -383,7 +384,7 @@ internal class PostgresBatchInsertionByPropertyProcessorTest {
                 data = dataForInsert,
                 conn = conn
             )
-        }.isInstanceOf(PSQLException::class.java)
+        }.isInstanceOf(BatchUpdateException::class.java)
     }
 
     @Test

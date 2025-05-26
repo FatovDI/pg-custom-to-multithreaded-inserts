@@ -16,7 +16,7 @@ fun getStringDataFromEntity(entity: BaseEntity) =
     getDataFromEntity(entity).map { it?.toString() }
 
 fun getDataFromEntity(entity: BaseEntity) =
-    entity.javaClass.declaredFields.map { field ->
+    getFieldsWithoutId(entity::class).map { field ->
         field.trySetAccessible()
         getDataFromEntityByField(entity, field)
     }
@@ -48,10 +48,23 @@ fun getTableName(clazz: KClass<*>): String {
 }
 
 fun getColumnsStringByClass(clazz: KClass<out BaseEntity>) =
-    clazz.java.declaredFields.joinToString(",") { getColumnName(it) }
+    getFieldsWithoutId(clazz).joinToString(",") { getColumnName(it) }
 
 fun getColumnsByClass(clazz: KClass<out BaseEntity>) =
-    clazz.java.declaredFields.map { getColumnName(it) }
+    getFieldsWithoutId(clazz).map { getColumnName(it) }
+
+fun getFieldsWithoutId(clazz: KClass<out BaseEntity>) =
+    getFields(clazz).filter { it.name != "id" }
+
+fun getFields(clazz: KClass<*>): List<Field> {
+    val fields = mutableListOf<Field>()
+    var currentClass: Class<*>? = clazz.java
+    while (currentClass != null && currentClass != Any::class.java) {
+        fields += currentClass.declaredFields
+        currentClass = currentClass.superclass
+    }
+    return fields
+}
 
 fun getColumns(columns: Set<KProperty1<*, *>>) =
     columns.map { getColumnName(it.javaField) }
