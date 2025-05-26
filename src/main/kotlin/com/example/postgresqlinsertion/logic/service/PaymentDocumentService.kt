@@ -15,7 +15,6 @@ import com.example.postgresqlinsertion.logic.repository.CurrencyRepository
 import com.example.postgresqlinsertion.logic.repository.PaymentDocumentCustomRepository
 import com.fasterxml.uuid.Generators
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -36,8 +35,7 @@ class PaymentDocumentService(
     private val pdBatchByPropertySaverFactory: BatchInsertionByPropertyFactory<PaymentDocumentEntity>,
     private val pdCustomRepository: PaymentDocumentCustomRepository,
     private val byPropertyProcessor: BatchInsertionByPropertyProcessor,
-    private val dataSource: DataSource,
-    val jdbcTemplate: JdbcTemplate = JdbcTemplate(dataSource),
+    private val dataSource: DataSource
 ) {
 
     private val log by logger()
@@ -83,8 +81,23 @@ class PaymentDocumentService(
             saver.commit()
         }
 
-        setReadyToRead(transactionId)
+        setReadyToReadByTransactionId(transactionId)
 
+    }
+
+    fun saveByCopyConcurrentForUpdate(count: Int, transactionId: UUID? = null) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+
+        pdBatchByEntitySaverFactory.getSaver(SaverType.COPY_CONCURRENT).use { saver ->
+            for (i in 0 until count) {
+                saver.addDataForSave(
+                    getRandomEntity(null, currencies.random(), accounts.random(), transactionId)
+                        .apply { readyToRead = false }
+                )
+            }
+            saver.commit()
+        }
     }
 
     fun saveByCopy(count: Int) {
@@ -448,24 +461,47 @@ class PaymentDocumentService(
     }
 
     fun setReadyToReadArray(idList: List<Long>): Int {
-        return jdbcTemplate.update(
-            "update payment_document set ready_to_read = true where id = any (?)"
-        ) {  ps ->
-            ps.setObject(1, idList.toTypedArray())
-        }
-    }
-
-    fun setReadyToRead(idList: List<Long>): Array<IntArray> {
-        return jdbcTemplate.batchUpdate(
-            "update payment_document set ready_to_read = true where id = ?",
-            idList, batchSize) {  ps, argument ->
-            ps.setLong(1, argument)
-        }
-    }
-
-    fun setReadyToRead(transactionId: UUID): Int {
         val conn = dataSource.connection
-        return conn.prepareStatement("update payment_document set ready_to_read = true  where transaction_id = ?").use { ps ->
+        return conn.prepareStatement("update payment_document set ready_to_read = true where id = any (?)").use { ps ->
+            ps.setObject(1, idList.toTypedArray())
+            ps.executeUpdate()
+        }
+    }
+
+    fun setReadyToReadBatch(idList: List<Long>): Int {
+        val conn = dataSource.connection
+        conn.autoCommit = false
+        var counter = 0
+        var rowAffected = 0
+
+        conn.prepareStatement("update payment_document set ready_to_read = true where id = ?").use { ps ->
+            idList.forEach {
+                ps.setLong(1, it)
+                ps.addBatch()
+                counter++
+                if (counter % batchSize == 0) {
+                    rowAffected += ps.executeBatch().sum()
+                }
+            }
+        }
+
+        conn.commit()
+        conn.close()
+
+        return rowAffected
+    }
+
+    fun removeTransactionId(transactionId: UUID): Int {
+        val conn = dataSource.connection
+        return conn.prepareStatement("update payment_document set transaction_id = null where transaction_id = ?").use { ps ->
+            ps.setObject(1, transactionId)
+            ps.executeUpdate()
+        }
+    }
+
+    fun setReadyToReadByTransactionId(transactionId: UUID): Int {
+        val conn = dataSource.connection
+        return conn.prepareStatement("update payment_document set ready_to_read = true where transaction_id = ?").use { ps ->
             ps.setObject(1, transactionId)
             ps.executeUpdate()
         }

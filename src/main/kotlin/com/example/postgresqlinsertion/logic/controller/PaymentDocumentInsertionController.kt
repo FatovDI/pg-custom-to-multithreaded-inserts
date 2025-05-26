@@ -1,14 +1,18 @@
 package com.example.postgresqlinsertion.logic.controller
 
+import com.example.postgresqlinsertion.batchinsertion.api.SqlHelper
 import com.example.postgresqlinsertion.logic.dto.ResponseDto
+import com.example.postgresqlinsertion.logic.entity.PaymentDocumentEntity
 import com.example.postgresqlinsertion.logic.service.PaymentDocumentService
+import com.fasterxml.uuid.Generators
 import org.springframework.web.bind.annotation.*
 import kotlin.system.measureTimeMillis
 
 @RestController
 @RequestMapping("/test-insertion")
 class PaymentDocumentInsertionController(
-    val service: PaymentDocumentService
+    val service: PaymentDocumentService,
+    val sqlHelper: SqlHelper
 ) {
 
     @PostMapping("/copy/{count}")
@@ -42,6 +46,72 @@ class PaymentDocumentInsertionController(
         }
         return ResponseDto(
             name = "Copy binary concurrent method",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
+    @PostMapping("/set-ready-to-read-batch/{count}")
+    fun setReadyToReadById(@PathVariable count: Int): ResponseDto {
+
+        service.saveByCopyConcurrentForUpdate(count)
+        val listId = sqlHelper.getIdListForSetReadyToRead(count, PaymentDocumentEntity::class)
+
+        val time = measureTimeMillis {
+            service.setReadyToReadBatch(listId)
+        }
+
+        return ResponseDto(
+            name = "Set ready to read batch",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
+    @PostMapping("/set-ready-to-read-array/{count}")
+    fun setReadyToReadArray(@PathVariable count: Int): ResponseDto {
+
+        service.saveByCopyConcurrentForUpdate(count)
+        val listId = sqlHelper.getIdListForSetReadyToRead(count, PaymentDocumentEntity::class)
+
+        val time = measureTimeMillis {
+            service.setReadyToReadArray(listId)
+        }
+
+        return ResponseDto(
+            name = "Set ready to read array",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
+    @PostMapping("/remove-transaction-id/{count}")
+    fun removeTransactionId(@PathVariable count: Int): ResponseDto {
+
+        val transactionId = Generators.timeBasedEpochGenerator().generate()
+        service.saveByCopyConcurrentForUpdate(count, transactionId)
+
+        val time = measureTimeMillis {
+            service.removeTransactionId(transactionId)
+        }
+        return ResponseDto(
+            name = "Remove transaction id",
+            count = count,
+            time = getTimeString(time)
+        )
+    }
+
+    @PostMapping("/set-ready-to-read-transaction-id/{count}")
+    fun setReadyToReadByTransactionId(@PathVariable count: Int): ResponseDto {
+
+        val transactionId = Generators.timeBasedEpochGenerator().generate()
+        service.saveByCopyConcurrentForUpdate(count, transactionId)
+
+        val time = measureTimeMillis {
+            service.setReadyToReadByTransactionId(transactionId)
+        }
+        return ResponseDto(
+            name = "Set ready to read transaction id",
             count = count,
             time = getTimeString(time)
         )
