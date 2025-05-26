@@ -464,9 +464,10 @@ class PaymentDocumentService(
     }
 
     fun setReadyToRead(transactionId: UUID): Int {
-        return jdbcTemplate.update(
-            "update payment_document set ready_to_read = true  where transaction_id = ?") {  ps ->
+        val conn = dataSource.connection
+        return conn.prepareStatement("update payment_document set ready_to_read = true  where transaction_id = ?").use { ps ->
             ps.setObject(1, transactionId)
+            ps.executeUpdate()
         }
     }
 
