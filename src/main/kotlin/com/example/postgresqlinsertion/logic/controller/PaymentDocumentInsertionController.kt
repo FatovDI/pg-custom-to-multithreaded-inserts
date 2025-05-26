@@ -85,50 +85,6 @@ class PaymentDocumentInsertionController(
         )
     }
 
-    @PostMapping("/remove-transaction-id/{count}")
-    fun removeTransactionId(@PathVariable count: Int): ResponseDto {
-
-        val transactionId = Generators.timeBasedEpochGenerator().generate()
-        service.saveByCopyConcurrentForUpdate(count, transactionId)
-
-        val time = measureTimeMillis {
-            service.removeTransactionId(transactionId)
-        }
-        return ResponseDto(
-            name = "Remove transaction id",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
-
-    @PostMapping("/set-ready-to-read-transaction-id/{count}")
-    fun setReadyToReadByTransactionId(@PathVariable count: Int): ResponseDto {
-
-        val transactionId = Generators.timeBasedEpochGenerator().generate()
-        service.saveByCopyConcurrentForUpdate(count, transactionId)
-
-        val time = measureTimeMillis {
-            service.setReadyToReadByTransactionId(transactionId)
-        }
-        return ResponseDto(
-            name = "Set ready to read transaction id",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
-
-    @PostMapping("/copy-concurrent-atomic/{count}")
-    fun insertViaCopyConcurrentAtomic(@PathVariable count: Int): ResponseDto {
-        val time = measureTimeMillis {
-            service.saveByCopyConcurrentAndAtomic(count)
-        }
-        return ResponseDto(
-            name = "Copy concurrent and atomic method",
-            count = count,
-            time = getTimeString(time)
-        )
-    }
-
     @PostMapping("/copy-by-binary/{count}")
     fun insertViaCopyByBinary(@PathVariable count: Int): ResponseDto {
         val time = measureTimeMillis {

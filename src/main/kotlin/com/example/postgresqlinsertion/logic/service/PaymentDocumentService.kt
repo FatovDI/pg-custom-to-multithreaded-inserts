@@ -66,33 +66,14 @@ class PaymentDocumentService(
 
     }
 
-    fun saveByCopyConcurrentAndAtomic(count: Int) {
-        val currencies = currencyRepo.findAll()
-        val accounts = accountRepo.findAll()
-        val transactionId = Generators.timeBasedEpochGenerator().generate()
-
-        pdBatchByEntitySaverFactory.getSaver(SaverType.COPY_CONCURRENT).use { saver ->
-            for (i in 0 until count) {
-                saver.addDataForSave(
-                    getRandomEntity(null, currencies.random(), accounts.random(), transactionId)
-                        .apply { readyToRead = false }
-                )
-            }
-            saver.commit()
-        }
-
-        setReadyToReadByTransactionId(transactionId)
-
-    }
-
-    fun saveByCopyConcurrentForUpdate(count: Int, transactionId: UUID? = null) {
+    fun saveByCopyConcurrentForUpdate(count: Int) {
         val currencies = currencyRepo.findAll()
         val accounts = accountRepo.findAll()
 
         pdBatchByEntitySaverFactory.getSaver(SaverType.COPY_CONCURRENT).use { saver ->
             for (i in 0 until count) {
                 saver.addDataForSave(
-                    getRandomEntity(null, currencies.random(), accounts.random(), transactionId)
+                    getRandomEntity(null, currencies.random(), accounts.random())
                         .apply { readyToRead = false }
                 )
             }
@@ -271,7 +252,7 @@ class PaymentDocumentService(
 
         pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
             for (i in 0 until count) {
-                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(),null, orderNumber))
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber))
             }
             saver.commit()
         }
@@ -284,7 +265,7 @@ class PaymentDocumentService(
 
         pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT_UNNEST).use { saver ->
             for (i in 0 until count) {
-                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), null, orderNumber))
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber))
             }
             saver.commit()
         }
@@ -491,22 +472,6 @@ class PaymentDocumentService(
         return rowAffected
     }
 
-    fun removeTransactionId(transactionId: UUID): Int {
-        val conn = dataSource.connection
-        return conn.prepareStatement("update payment_document set transaction_id = null where transaction_id = ?").use { ps ->
-            ps.setObject(1, transactionId)
-            ps.executeUpdate()
-        }
-    }
-
-    fun setReadyToReadByTransactionId(transactionId: UUID): Int {
-        val conn = dataSource.connection
-        return conn.prepareStatement("update payment_document set ready_to_read = true where transaction_id = ?").use { ps ->
-            ps.setObject(1, transactionId)
-            ps.executeUpdate()
-        }
-    }
-
     fun findAllByOrderNumberAndOrderDate(orderNumber: String, orderDate: LocalDate): List<PaymentDocumentEntity> {
         return pdCustomRepository.findAllByOrderNumberAndOrderDate(orderNumber, orderDate)
     }
@@ -515,7 +480,6 @@ class PaymentDocumentService(
         id: Long?,
         cur: CurrencyEntity,
         account: AccountEntity,
-        transactionId: UUID? = null,
         orderNumber: String? = null
     ): PaymentDocumentEntity {
         return PaymentDocumentEntity(
@@ -531,8 +495,6 @@ class PaymentDocumentService(
             prop20 = getRandomString(20),
         )
             .apply { this.id = id }
-            .apply { this.transactionId = transactionId }
-            .apply { this.readyToRead = transactionId?.let { false }?: true }
     }
 
     private fun fillRandomDataByKProperty(
