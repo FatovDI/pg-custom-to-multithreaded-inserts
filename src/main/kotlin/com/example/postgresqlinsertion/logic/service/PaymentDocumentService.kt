@@ -23,6 +23,7 @@ import javax.sql.DataSource
 import kotlin.random.Random
 import kotlin.reflect.KMutableProperty1
 
+@OptIn(ExperimentalStdlibApi::class)
 
 @Service
 class PaymentDocumentService(
@@ -82,7 +83,6 @@ class PaymentDocumentService(
         }
 
         setReadyToReadByTransactionId(transactionId)
-
     }
 
     fun saveByCopyConcurrentForUpdate(count: Int, transactionId: UUID? = null) {
@@ -493,18 +493,22 @@ class PaymentDocumentService(
 
     fun removeTransactionId(transactionId: UUID): Int {
         val conn = dataSource.connection
-        return conn.prepareStatement("update payment_document set transaction_id = null where transaction_id = ?").use { ps ->
-            ps.setObject(1, transactionId)
-            ps.executeUpdate()
-        }
+        return conn
+            .prepareStatement("update payment_document set transaction_id = null where transaction_id = ?")
+            .use { ps ->
+                ps.setObject(1, transactionId)
+                ps.executeUpdate()
+            }
     }
 
     fun setReadyToReadByTransactionId(transactionId: UUID): Int {
         val conn = dataSource.connection
-        return conn.prepareStatement("update payment_document set ready_to_read = true where transaction_id = ?").use { ps ->
-            ps.setObject(1, transactionId)
-            ps.executeUpdate()
-        }
+        return conn
+            .prepareStatement("update payment_document set ready_to_read = true where transaction_id = ?")
+            .use { ps ->
+                ps.setObject(1, transactionId)
+                ps.executeUpdate()
+            }
     }
 
     fun findAllByOrderNumberAndOrderDate(orderNumber: String, orderDate: LocalDate): List<PaymentDocumentEntity> {
