@@ -20,7 +20,7 @@ import javax.sql.DataSource
 import kotlin.random.Random
 import kotlin.reflect.KMutableProperty1
 
-
+@OptIn(ExperimentalStdlibApi::class)
 @Service
 class PaymentDocumentService(
     private val accountRepo: AccountRepository,
@@ -213,39 +213,39 @@ class PaymentDocumentService(
 
     }
 
-    fun saveByInsertWithPreparedStatementMultiRow(count: Int, orderNumber: String? = null) {
+    fun saveByInsertWithPreparedStatementMultiRow(count: Int) {
         val currencies = currencyRepo.findAll()
         val accounts = accountRepo.findAll()
 
         pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT_MULTI_ROW).use { saver ->
             for (i in 0 until count) {
-                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber))
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
             }
             saver.commit()
         }
 
     }
 
-    fun saveByInsertWithPreparedStatement(count: Int, orderNumber: String? = null) {
+    fun saveByInsertWithPreparedStatement(count: Int) {
         val currencies = currencyRepo.findAll()
         val accounts = accountRepo.findAll()
 
         pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT).use { saver ->
             for (i in 0 until count) {
-                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber))
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
             }
             saver.commit()
         }
 
     }
 
-    fun saveByInsertWithPreparedStatementAndUnnest(count: Int, orderNumber: String? = null) {
+    fun saveByInsertWithPreparedStatementAndUnnest(count: Int) {
         val currencies = currencyRepo.findAll()
         val accounts = accountRepo.findAll()
 
         pdBatchByEntitySaverFactory.getSaver(SaverType.INSERT_PREPARED_STATEMENT_UNNEST).use { saver ->
             for (i in 0 until count) {
-                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), orderNumber))
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
             }
             saver.commit()
         }
@@ -429,12 +429,11 @@ class PaymentDocumentService(
     private fun getRandomEntity(
         id: Long?,
         cur: CurrencyEntity,
-        account: AccountEntity,
-        orderNumber: String? = null
+        account: AccountEntity
     ): PaymentDocumentEntity {
         return PaymentDocumentEntity(
             orderDate = LocalDate.now(),
-            orderNumber = orderNumber?: getRandomString(10),
+            orderNumber = getRandomString(10),
             amount = BigDecimal.valueOf(Random.nextDouble()),
             cur = cur,
             expense = Random.nextBoolean(),

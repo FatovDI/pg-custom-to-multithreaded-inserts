@@ -158,11 +158,10 @@ class PaymentDocumentInsertionController(
 
     @PostMapping("/insert-prepared-statement-multi-row/{count}")
     fun insertViaInsertWithPreparedStatementMultiRow(
-        @PathVariable count: Int,
-        @RequestParam orderNumber: String? = null
+        @PathVariable count: Int
     ): ResponseDto {
         val time = measureTimeMillis {
-            service.saveByInsertWithPreparedStatementMultiRow(count, orderNumber)
+            service.saveByInsertWithPreparedStatementMultiRow(count)
         }
         return ResponseDto(
             name = "Insert method PS multi row",
@@ -173,11 +172,10 @@ class PaymentDocumentInsertionController(
 
     @PostMapping("/insert-prepared-statement/{count}")
     fun insertViaInsertWithPreparedStatement(
-        @PathVariable count: Int,
-        @RequestParam orderNumber: String? = null
+        @PathVariable count: Int
     ): ResponseDto {
         val time = measureTimeMillis {
-            service.saveByInsertWithPreparedStatement(count, orderNumber)
+            service.saveByInsertWithPreparedStatement(count)
         }
         return ResponseDto(
             name = "Insert method PS",
@@ -188,11 +186,10 @@ class PaymentDocumentInsertionController(
 
     @PostMapping("/insert-prepared-statement-unnest/{count}")
     fun insertViaInsertWithPreparedStatementUnnest(
-        @PathVariable count: Int,
-        @RequestParam orderNumber: String? = null
+        @PathVariable count: Int
     ): ResponseDto {
         val time = measureTimeMillis {
-            service.saveByInsertWithPreparedStatementAndUnnest(count, orderNumber)
+            service.saveByInsertWithPreparedStatementAndUnnest(count)
         }
         return ResponseDto(
             name = "Insert method PS unnest",
