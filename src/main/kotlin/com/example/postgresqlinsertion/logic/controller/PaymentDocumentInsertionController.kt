@@ -55,7 +55,10 @@ class PaymentDocumentInsertionController(
     fun setReadyToReadById(@PathVariable count: Int): ResponseDto {
 
         service.saveByCopyConcurrentForUpdate(count)
-        val listId = sqlHelper.getIdListForSetReadyToRead(count, PaymentDocumentEntity::class)
+        val listId = sqlHelper.getIdListForSetReadyToRead(
+            count = count,
+            clazz = PaymentDocumentEntity::class
+        )
 
         val time = measureTimeMillis {
             service.setReadyToReadBatch(listId)

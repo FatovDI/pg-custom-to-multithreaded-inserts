@@ -443,10 +443,12 @@ class PaymentDocumentService(
 
     fun setReadyToReadArray(idList: List<Long>): Int {
         val conn = dataSource.connection
-        return conn.prepareStatement("update payment_document set ready_to_read = true where id = any (?)").use { ps ->
-            ps.setObject(1, idList.toTypedArray())
-            ps.executeUpdate()
-        }
+        return conn
+            .prepareStatement("update payment_document set ready_to_read = true where id = any (?)")
+            .use { ps ->
+                ps.setObject(1, idList.toTypedArray())
+                ps.executeUpdate()
+            }
     }
 
     fun setReadyToReadBatch(idList: List<Long>): Int {
