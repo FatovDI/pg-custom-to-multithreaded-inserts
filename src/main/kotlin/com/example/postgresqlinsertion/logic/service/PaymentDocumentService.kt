@@ -14,10 +14,10 @@ import com.example.postgresqlinsertion.logic.repository.AccountRepository
 import com.example.postgresqlinsertion.logic.repository.CurrencyRepository
 import com.example.postgresqlinsertion.logic.repository.PaymentDocumentCustomRepository
 import com.fasterxml.uuid.Generators
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.*
 import javax.sql.DataSource
 import kotlin.random.Random
 import kotlin.reflect.KMutableProperty1
@@ -33,7 +33,6 @@ class PaymentDocumentService(
     private val pdCustomRepository: PaymentDocumentCustomRepository,
     private val byPropertyProcessor: BatchInsertionByPropertyProcessor,
     private val dataSource: DataSource,
-    val jdbcTemplate: JdbcTemplate = JdbcTemplate(dataSource),
 ) {
 
     private val log by logger()
@@ -77,7 +76,32 @@ class PaymentDocumentService(
 
         pdBatchByEntitySaverFactory.getSaver(SaverType.COPY_CONCURRENT).use { saver ->
             for (i in 0 until count) {
-                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random()))
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), transactionId))
+            }
+            saver.commit()
+        }
+
+        conn.prepareStatement("DELETE FROM active_transaction WHERE transaction_id =?").use { stmt ->
+            stmt.setObject(1, transactionId)
+            stmt.executeUpdate()
+        }
+        conn.close()
+    }
+
+    fun saveByCopyBinaryConcurrentAndAtomic(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+        val transactionId = Generators.timeBasedEpochGenerator().generate()
+        val conn = dataSource.connection
+
+        conn.prepareStatement("INSERT INTO active_transaction (transaction_id) VALUES (?)").use { stmt ->
+            stmt.setObject(1, transactionId)
+            stmt.executeUpdate()
+        }
+
+        pdBatchByEntitySaverFactory.getSaver(SaverType.COPY_BINARY_CONCURRENT).use { saver ->
+            for (i in 0 until count) {
+                saver.addDataForSave(getRandomEntity(null, currencies.random(), accounts.random(), transactionId))
             }
             saver.commit()
         }
@@ -457,7 +481,8 @@ class PaymentDocumentService(
     private fun getRandomEntity(
         id: Long?,
         cur: CurrencyEntity,
-        account: AccountEntity
+        account: AccountEntity,
+        transactionId: UUID? = null
     ): PaymentDocumentEntity {
         return PaymentDocumentEntity(
             orderDate = LocalDate.now(),
@@ -470,7 +495,9 @@ class PaymentDocumentService(
             prop10 = getRandomString(10),
             prop15 = getRandomString(15),
             prop20 = getRandomString(20),
-        ).apply { this.id = id }
+        )
+            .apply { this.id = id }
+            .apply { this.transactionId = transactionId }
     }
 
     private fun fillRandomDataByKProperty(

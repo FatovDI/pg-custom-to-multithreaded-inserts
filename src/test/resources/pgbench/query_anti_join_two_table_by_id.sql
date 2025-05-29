@@ -2,18 +2,18 @@ SET SCHEMA 'test_insertion';
 
 \set id random(203958073, 203959073)
 
-select paymentdoc.id,
-       paymentdoc.transaction_id,
-       paymentdoc.account_id,
-       paymentdoc.amount,
-       paymentdoc.cur,
-       paymentdoc.expense,
-       paymentdoc.order_date,
-       paymentdoc.order_number,
-       paymentdoc.payment_purpose,
-       paymentdoc.prop_10,
-       paymentdoc.prop_15,
-       paymentdoc.prop_20
-from payment_document paymentdoc
-where (NOT EXISTS(SELECT * FROM active_transaction at WHERE at.transaction_id = paymentdoc.transaction_id))
-  AND paymentdoc.id = :id;
+select pd.id,
+       pd.transaction_id,
+       pd.account_id,
+       pd.amount,
+       pd.cur,
+       pd.expense,
+       pd.order_date,
+       pd.order_number,
+       pd.payment_purpose,
+       pd.prop_10,
+       pd.prop_15,
+       pd.prop_20
+from payment_document pd
+where (NOT EXISTS(SELECT * FROM active_transaction at WHERE at.transaction_id = pd.transaction_id))
+  AND pd.id = :id;

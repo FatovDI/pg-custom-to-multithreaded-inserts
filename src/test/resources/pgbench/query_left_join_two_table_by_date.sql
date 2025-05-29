@@ -5,19 +5,19 @@ SET SCHEMA 'test_insertion';
 
 -- \set dt '2025-01-19'
 
-select paymentdoc.id,
-       paymentdoc.transaction_id,
-       paymentdoc.account_id,
-       paymentdoc.amount,
-       paymentdoc.cur,
-       paymentdoc.expense,
-       paymentdoc.order_date,
-       paymentdoc.order_number,
-       paymentdoc.payment_purpose,
-       paymentdoc.prop_10,
-       paymentdoc.prop_15,
-       paymentdoc.prop_20
-from payment_document paymentdoc
-         left outer join active_transaction at on paymentdoc.transaction_id = at.transaction_id
-where (at.transaction_id is null)
-  AND paymentdoc.order_date = '2025-02-03';
+select pd.id,
+       pd.transaction_id,
+       pd.account_id,
+       pd.amount,
+       pd.cur,
+       pd.expense,
+       pd.order_date,
+       pd.order_number,
+       pd.payment_purpose,
+       pd.prop_10,
+       pd.prop_15,
+       pd.prop_20
+from payment_document pd
+         left outer join active_transaction at on pd.transaction_id = at.transaction_id
+where at.transaction_id is null
+  AND pd.order_date = '2025-02-03';
