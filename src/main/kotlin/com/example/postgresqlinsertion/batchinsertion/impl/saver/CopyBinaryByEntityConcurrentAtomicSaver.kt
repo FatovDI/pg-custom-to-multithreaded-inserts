@@ -19,9 +19,12 @@ class CopyBinaryByEntityConcurrentAtomicSaver<E : BaseEntity>(
     override fun commit() {
         checkSaveDataJob()
         super.saveData()
-        conn.createStatement().use { stmt ->
-            stmt.execute("PREPARE TRANSACTION '$transactionId';")
-        }
+        conn.createStatement().use { stmt -> stmt.execute("PREPARE TRANSACTION '$transactionId';") }
         conn.commit()
+    }
+
+    override fun rollback() {
+        conn.createStatement().use { stmt -> stmt.execute("ROLLBACK PREPARED '$transactionId';") }
+        super.rollback()
     }
 }

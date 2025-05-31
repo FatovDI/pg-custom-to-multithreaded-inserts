@@ -50,9 +50,7 @@ class CopyBinaryByEntityConcurrentAtomicSaverHandler<E : BaseEntity>(
                 "'${it.transactionId}'"
             }
             .let {
-                conn.createStatement().use { stmt ->
-                    stmt.execute("COMMIT PREPARED $it;")
-                }
+                conn.createStatement().use { stmt -> stmt.execute("COMMIT PREPARED $it;") }
                 conn.close()
             }
     }
