@@ -24,6 +24,18 @@ fun writeString(data: String, outputStream: DataOutputStream){
     outputStream.write(bytes)
 }
 
+fun writeUUID(uuid: UUID, outputStream: DataOutputStream){
+
+    outputStream.writeInt(16)
+
+    val buf = ByteArray(16)
+    ByteConverter.int8(buf, 0, uuid.mostSignificantBits)
+    ByteConverter.int8(buf, 8, uuid.leastSignificantBits)
+
+
+    outputStream.write(buf)
+}
+
 fun writeLocalDate(data: LocalDate, outputStream: DataOutputStream){
 
     outputStream.writeInt(4)
