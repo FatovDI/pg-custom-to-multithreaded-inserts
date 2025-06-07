@@ -12,6 +12,7 @@ import java.io.Reader
 import java.math.BigDecimal
 import java.sql.Connection
 import java.time.LocalDate
+import java.util.UUID
 import kotlin.reflect.KClass
 
 /**
@@ -76,6 +77,7 @@ abstract class AbstractBatchInsertionProcessor {
             is Boolean -> writeBoolean(obj, outputStream)
             is String -> writeString(obj, outputStream)
             is LocalDate -> writeLocalDate(obj, outputStream)
+            is UUID -> writeUUID(obj, outputStream)
         }
     }
 
