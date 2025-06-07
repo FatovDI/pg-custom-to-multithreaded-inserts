@@ -85,6 +85,24 @@ class PaymentDocumentService(
         setReadyToReadByTransactionId(transactionId)
     }
 
+    fun saveByCopyBinaryConcurrentAndAtomic(count: Int) {
+        val currencies = currencyRepo.findAll()
+        val accounts = accountRepo.findAll()
+        val transactionId = Generators.timeBasedEpochGenerator().generate()
+
+        pdBatchByEntitySaverFactory.getSaver(SaverType.COPY_BINARY_CONCURRENT).use { saver ->
+            for (i in 0 until count) {
+                saver.addDataForSave(
+                    getRandomEntity(null, currencies.random(), accounts.random(), transactionId)
+                        .apply { readyToRead = false }
+                )
+            }
+            saver.commit()
+        }
+
+        setReadyToReadByTransactionId(transactionId)
+    }
+
     fun saveByCopyConcurrentForUpdate(count: Int, transactionId: UUID? = null) {
         val currencies = currencyRepo.findAll()
         val accounts = accountRepo.findAll()
