@@ -1,5 +1,6 @@
 package com.example.postgresqlinsertion.logic.controller
 
+import com.example.postgresqlinsertion.batchinsertion.utils.getTimeString
 import com.example.postgresqlinsertion.logic.dto.ResponseDto
 import com.example.postgresqlinsertion.logic.service.PaymentDocumentService
 import org.springframework.web.bind.annotation.*
@@ -308,13 +309,5 @@ class PaymentDocumentInsertionController(
             count = count,
             time = getTimeString(time)
         )
-    }
-
-
-    private fun getTimeString(time: Long):String {
-        val min = (time / 1000) / 60
-        val sec = (time / 1000) % 60
-        val ms = time - min*1000*60 - sec*1000
-        return "$min min, $sec sec $ms ms"
     }
 }

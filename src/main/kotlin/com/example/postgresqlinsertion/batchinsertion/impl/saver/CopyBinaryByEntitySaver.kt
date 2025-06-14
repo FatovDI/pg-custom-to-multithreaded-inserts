@@ -1,12 +1,14 @@
 package com.example.postgresqlinsertion.batchinsertion.impl.saver
 
 import com.example.postgresqlinsertion.batchinsertion.api.processor.BatchInsertionByEntityProcessor
+import com.example.postgresqlinsertion.batchinsertion.utils.getTimeString
 import com.example.postgresqlinsertion.logic.entity.BaseEntity
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.sql.Connection
 import kotlin.reflect.KClass
+import kotlin.system.measureTimeMillis
 
 open class CopyBinaryByEntitySaver<E : BaseEntity>(
     private val processor: BatchInsertionByEntityProcessor,
@@ -17,6 +19,7 @@ open class CopyBinaryByEntitySaver<E : BaseEntity>(
 
     private var byteArrayOs = ByteArrayOutputStream()
     private var writer = DataOutputStream(BufferedOutputStream(byteArrayOs))
+    private var saveTime = 0L
 
     init {
         processor.startSaveBinaryDataForCopyMethod(writer)
@@ -30,17 +33,20 @@ open class CopyBinaryByEntitySaver<E : BaseEntity>(
     override fun saveData() {
         processor.endSaveBinaryDataForCopyMethod(writer)
         writer.close()
-        processor.saveBinaryToDataBaseByCopyMethod(
-            clazz = entityClass,
-            from = byteArrayOs.toByteArray().inputStream(),
-            conn = conn
-        )
+        saveTime += measureTimeMillis {
+            processor.saveBinaryToDataBaseByCopyMethod(
+                clazz = entityClass,
+                from = byteArrayOs.toByteArray().inputStream(),
+                conn = conn
+            )
+        }
         byteArrayOs = ByteArrayOutputStream()
         writer = DataOutputStream(BufferedOutputStream(byteArrayOs))
         processor.startSaveBinaryDataForCopyMethod(writer)
     }
 
     override fun close() {
+        log.info("save time: ${getTimeString(saveTime)}")
         writer.close()
         super.close()
     }
