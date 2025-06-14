@@ -19,7 +19,14 @@ class CopyBinaryByEntityConcurrentSaverHandler<E : BaseEntity>(
     private var counterEntity = 0
     private var counterSaver = 0
     private val savers = (1..numberOfSavers)
-        .map { CopyBinaryByEntityConcurrentSaver(processor, entityClass, dataSource.connection, batchSize, executorService) }
+        .map {
+            CopyBinaryByEntityConcurrentSaver(
+                processor,
+                entityClass,
+                dataSource.connection,
+                batchSize,
+                executorService)
+        }
 
     override fun addDataForSave(entity: E) {
 
@@ -31,15 +38,15 @@ class CopyBinaryByEntityConcurrentSaverHandler<E : BaseEntity>(
         counterEntity.takeIf { it % batchSize == 0 }?.let { counterSaver++ }
     }
 
-    override fun saveData() {
-        savers.forEach {
-            it.saveData()
-        }
-    }
-
     override fun commit() {
         savers.forEach {
             it.commit()
+        }
+    }
+
+    override fun saveData() {
+        savers.forEach {
+            it.saveData()
         }
     }
 
