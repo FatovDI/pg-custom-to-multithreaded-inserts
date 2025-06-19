@@ -7,8 +7,9 @@ This application is designed to test various methods for inserting data into a P
 - A preloaded PostgreSQL database with over 100 million rows in the "payment_document" table.
 - Multiple indexes in the "payment_document" table to influence the insertion process.
 
-This branch Maintains atomicity of multithreaded inserts using a ready_to_read flag within the table itself. For testing other approaches, please use the following branches:
+This branch maintains atomicity of multithreaded inserts using a ready_to_read flag and a shared transaction_id field within the table itself. For testing other approaches, please use the following branches:
 - [main](https://github.com/FatovDI/pg-custom-to-multithreaded-inserts/tree/main): experimenting with various data insertion approaches, ranging from custom PostgreSQL methods to multithreading, without guaranteeing atomicity of the entire operation.
+- [ready_to_read](https://github.com/FatovDI/pg-custom-to-multithreaded-inserts/tree/ready_to_read): Maintains atomicity of multithreaded inserts using a ready_to_read flag within the table itself.
 - [ready_to_read_transaction_id](https://github.com/FatovDI/pg-custom-to-multithreaded-inserts/tree/ready_to_read_transaction_id): Maintains atomicity of multithreaded inserts using a ready_to_read flag and a shared transaction_id field within the table itself.
 - [transaction_id_two_table](https://github.com/FatovDI/pg-custom-to-multithreaded-inserts/tree/transaction_id_two_table): Maintains atomicity of multithreaded inserts by storing the atomicity indicator in a separate table.
 - [prepared_transaction_patch](https://github.com/FatovDI/pg-custom-to-multithreaded-inserts/tree/prepared_transaction_patch): Maintains atomicity of multithreaded inserts using the prepared transaction method.
@@ -57,6 +58,9 @@ This branch Maintains atomicity of multithreaded inserts using a ready_to_read f
 Use the following endpoints to test different insertion methods. You can specify the number of rows to generate in the database and retrieve results with performance metrics. For convenience, utilize `curl -X POST` to interact with these endpoints. The number of rows to create is specified by the `count` path parameter.
 
 ```bash
+# Testing an update approach for setting the ready_to_read flag by transaction id. The data will be saved in batches of 5,000 rows.
+http://localhost:8080/test-insertion/set-ready-to-read-transaction-id/{count}
+
 # Testing a batch update approach for setting the ready_to_read flag. The data will be saved in batches of 5,000 rows.
 http://localhost:8080/test-insertion/set-ready-to-read-batch/{count}
 
